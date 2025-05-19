@@ -146,17 +146,10 @@ RU:
 
 ## Technology Stack / Технологический стек
 
-EN:
 *   HTML5
 *   CSS3
 *   Vanilla JavaScript (ES6+)
 *   [Marked.js](https://marked.js.org/) (for Markdown rendering)
-
-RU:
-*   HTML5
-*   CSS3
-*   Чистый JavaScript (ES6+)
-*   [Marked.js](https://marked.js.org/) (для отображения Markdown)
 
 ---
 
@@ -190,8 +183,4 @@ RU:
 
 ## Author / Автор
 
-EN:
-VOVSn - [github.com/VOVSn](https://github.com/VOVSn)
-
-RU:
 VOVSn - [github.com/VOVSn](https://github.com/VOVSn)
