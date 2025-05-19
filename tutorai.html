@@ -1,0 +1,3318 @@
+<!DOCTYPE html>
+<!-- We need to have single html with styles and js ebmedded -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate-key="pageTitle">TUTORAI Chat</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #e8e3d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.3s ease; /* Smooth transition for body background */
+        }
+
+        /* Main Chat Container */
+        .chat-app {
+            width: 960px; /* Desktop width - Increased */
+            height: 720px; /* Desktop height - Increased */
+            background: linear-gradient(145deg, #eae5db, #dcd7cd);
+            border-radius: 20px; /* Slightly less rounded for desktop */
+            box-shadow:
+                15px 15px 35px #c4c0b7,
+                -15px -15px 35px #fcf7ed;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+        }
+
+        /* Chat Header */
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* To space out agent-info and settings button */
+            padding: 20px 25px; /* Increased padding */
+            background: linear-gradient(145deg, #eae5db, #e0dbd1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative; /* For z-index context and settings panel positioning */
+            z-index: 2; /* Higher than chat-app::before, content */
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .header-icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(145deg, #e8e3d9, #d9d4ca);
+            box-shadow:
+                4px 4px 8px #cbc6bd,
+                -4px -4px 8px #f5f0e5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative; /* For hover effect */
+        }
+        .header-icon-button:active {
+             box-shadow:
+                inset 3px 3px 6px #cbc6bd,
+                inset -3px -3px 6px #f5f0e5;
+        }
+        .header-icon-button svg {
+            width: 20px;
+            height: 20px;
+            fill: #736b5e;
+            transition: fill 0.3s ease;
+        }
+
+
+        .agent-info {
+            flex-grow: 1; /* Allow agent-info to take available space */
+            display: flex;
+            align-items: center;
+        }
+
+        .agent-name {
+            font-weight: bold;
+            font-size: 20px;
+            color: #5a5346;
+            transition: color 0.3s ease;
+        }
+
+        .agent-status {
+            font-size: 13px;
+            color: #847c6f;
+            margin-top: 2px;
+            transition: color 0.3s ease;
+        }
+        .agent-status.reachable {
+            color: #4CAF50; /* Green for reachable */
+        }
+        .agent-status.not-reachable {
+            color: #F44336; /* Red for not reachable */
+        }
+        .agent-status.tutoring { /* New status for tutoring mode */
+            color: #2196F3; /* Blue for tutoring */
+        }
+
+
+        /* Settings Panel (Popup) */
+        .settings-panel {
+            position: absolute;
+            top: 75px; /* Position below header */
+            right: 25px; /* Align with header padding */
+            width: 320px;
+            max-height: calc(100vh - 100px - 20px - 40px); /* Max height considering header, tabs and some padding */
+            background: linear-gradient(145deg, #e8e3d9, #dcd7cd);
+            border-radius: 15px;
+            box-shadow: 8px 8px 16px #c4c0b7, -8px -8px 16px #fcf7ed;
+            z-index: 10;
+
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px) scale(0.95);
+            transition: opacity 0.25s ease-out, transform 0.25s ease-out, visibility 0s linear 0.25s, background 0.3s ease, box-shadow 0.3s ease;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .settings-panel.is-open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            transition-delay: 0s, 0s, 0s;
+            pointer-events: auto;
+        }
+
+        .settings-panel-content { /* New wrapper for all settings items */
+            padding: 20px;
+            padding-top: 0; /* Tabs will have their own space */
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Settings Tabs */
+        .settings-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #c5bdab;
+            flex-shrink: 0; /* Prevent tabs from shrinking */
+            padding-top: 15px; /* Give tabs some top space */
+        }
+        .settings-tab-button {
+            padding: 10px 15px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #847c6f;
+            border-bottom: 2px solid transparent;
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            margin-bottom: -1px;
+        }
+        .settings-tab-button:hover {
+            color: #5a5346;
+        }
+        .settings-tab-button.active {
+            color: #5a5346;
+            border-bottom-color: #5a5346;
+        }
+
+        .settings-tab-content {
+            display: none; /* Hide by default */
+            flex-grow: 1; /* Allow content to take up space if needed */
+        }
+        .settings-tab-content.active {
+            display: block; /* Show active tab content */
+        }
+         .settings-tab-content .settings-group-title:first-child {
+            margin-top: 0;
+        }
+
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+         .settings-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-label {
+            font-size: 14px;
+            color: #5a5346;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+        .settings-panel select.settings-input { /* Kept for potential future selects */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%235A5346%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22/%3E%3C/svg%3E');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: .65em auto;
+            padding-right: 30px; /* Make space for arrow */
+        }
+
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #dcd7cd;
+            box-shadow:
+                inset 2px 2px 4px #cbc6bd,
+                inset -2px -2px 4px #f5f0e5;
+            border-radius: 34px;
+            transition: .4s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: linear-gradient(145deg, #f0ebe1, #e0dbd1);
+            border-radius: 50%;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            transition: .4s;
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(145deg, #d5ccb8, #c6bdaa);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+            background: linear-gradient(145deg, #d9cebc, #c8beac);
+        }
+
+        /* New Settings Inputs and Button */
+        .settings-group-title {
+            font-size: 12px;
+            color: #847c6f;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            margin-top: 20px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #c5bdab;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+        .settings-input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 10px;
+            background: #e2ddd3;
+            color: #5a5346;
+            outline: none;
+            font-size: 13px;
+            box-shadow:
+                inset 2px 2px 4px #cbc6bd,
+                inset -2px -2px 4px #f5f0e5;
+            border: 1px solid rgba(173, 157, 124, 0.05);
+            transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            min-width: 0;
+        }
+        .settings-input::placeholder {
+            color: #a0988a;
+            transition: color 0.3s ease;
+        }
+        .settings-input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+        .settings-input[type="number"]::-webkit-inner-spin-button,
+        .settings-input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+
+        .settings-row.action-row {
+            justify-content: space-between;
+            align-items: center;
+        }
+        .settings-button {
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: linear-gradient(145deg, #e8e3d9, #d9d4ca);
+            box-shadow: 3px 3px 6px #cbc6bd, -3px -3px 6px #f5f0e5;
+            color: #5a5346;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-grow: 1; /* Allow buttons in action-row to take space if needed */
+            text-align: center;
+        }
+        .settings-button:active {
+            box-shadow: inset 2px 2px 4px #cbc6bd, inset -2px -2px 4px #f5f0e5;
+        }
+        .settings-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .settings-button.danger {
+            background: linear-gradient(145deg, #e6c8c1, #d7b9b2);
+            box-shadow: 3px 3px 6px #c2a8a1, -3px -3px 6px #fce8e1;
+            color: #7c3f36;
+        }
+        .settings-button.danger:active {
+            box-shadow: inset 2px 2px 4px #c2a8a1, inset -2px -2px 4px #fce8e1;
+        }
+
+        .status-text {
+            font-size: 12px;
+            text-align: right;
+            flex-shrink: 0;
+            margin-left: 10px;
+            transition: color 0.3s ease;
+        }
+        .status-text.checking { color: #847c6f; }
+        .status-text.success { color: #4CAF50; font-weight: 500; }
+        .status-text.error { color: #F44336; font-weight: 500; }
+
+        /* About Section in Settings (inside modal) */
+        .modal-popup .settings-about-text {
+            font-size: 13px;
+            color: #5a5346;
+            line-height: 1.5;
+            margin-top: 15px;
+            transition: color 0.3s ease;
+        }
+        .modal-popup .settings-about-text p {
+            margin-bottom: 8px;
+        }
+        .modal-popup .settings-about-text p:last-child {
+            margin-bottom: 0;
+        }
+        .modal-popup .settings-about-text a {
+            color: #736b5e;
+            text-decoration: none;
+            border-bottom: 1px dotted #847c6f;
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+        }
+        .modal-popup .settings-about-text a:hover {
+            color: #5a5346;
+            border-bottom-style: solid;
+        }
+
+
+        /* Chat Messages Area */
+        .chat-messages {
+            flex: 1;
+            padding: 20px 25px;
+            overflow-y: auto;
+            background: linear-gradient(125deg, #e6e1d7, #dbd6cc);
+            box-shadow:
+                inset 5px 5px 15px #cbc6bd,
+                inset -5px -5px 15px #f5f0e5;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Base message style */
+        .message {
+            max-width: 70%;
+            padding: 9px 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+            transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .message-content {
+        }
+         .message.user .message-content .image-indicator {
+            margin-right: 5px;
+            font-size: 1.1em;
+        }
+        .message-image-preview {
+            max-width: 300px; /* Increased from 150px */
+            max-height: 300px; /* Increased from 150px */
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: block;
+            background-color: #dcd7cd; /* Fallback bg for image loading */
+            transition: background-color 0.3s ease;
+        }
+        .message-image-fallback-icon {
+            width: 40px;
+            height: 40px;
+            fill: #847c6f;
+            margin-bottom: 8px;
+            display: block;
+            transition: fill 0.3s ease;
+        }
+
+        .message.ai .message-content ul, .message.ai .message-content ol,
+        .message.tutor .message-content ul, .message.tutor .message-content ol {
+            margin-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .message.ai .message-content li,
+        .message.tutor .message-content li {
+            margin-bottom: 3px;
+        }
+         .message.ai .message-content p,
+         .message.tutor .message-content p {
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+        .message.ai .message-content p:first-child,
+        .message.tutor .message-content p:first-child {
+            margin-top: 0;
+        }
+        .message.ai .message-content p:last-child,
+        .message.tutor .message-content p:last-child {
+            margin-bottom: 0;
+        }
+        .message.ai .message-content code, /* Basic styling for inline code */
+        .message.tutor .message-content code {
+            background-color: rgba(0,0,0,0.05);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        .message.ai .message-content pre, /* Basic styling for code blocks */
+        .message.tutor .message-content pre {
+            background-color: rgba(0,0,0,0.05);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 0.5em 0;
+        }
+        .message.ai .message-content pre code,
+        .message.tutor .message-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            font-size: 1em; /* Reset from inline */
+        }
+
+
+        /* User message style */
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(145deg, #d5ccb8, #c6bdaa);
+            border-radius: 18px 18px 4px 18px;
+            color: #5a5346;
+            box-shadow:
+                5px 5px 15px #b5ac9a,
+                -5px -5px 15px #e5dcc8;
+            border: 1px solid rgba(173, 157, 124, 0.2);
+            position: relative;
+            isolation: isolate;
+        }
+
+        .message.user > div, .message.user > span, .message.user > ul {
+            position: relative;
+        }
+        .message.user ul {
+            padding-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .message.user li {
+            margin-bottom: 3px;
+        }
+
+        /* AI message style */
+        .message.ai, .message.tutor { /* Apply AI style to tutor messages as a base */
+            align-self: flex-start;
+            background: linear-gradient(145deg, #e8e3d9, #dcd7cd);
+            border-radius: 18px 18px 18px 4px;
+            color: #5a5346;
+            box-shadow:
+                5px 5px 15px #cbc6bd,
+                -5px -5px 15px #f5f0e5;
+            border: 1px solid rgba(173, 157, 124, 0.1);
+        }
+
+
+        .message-time {
+            font-size: 10px;
+            color: #847c6f;
+            margin-top: 5px;
+            text-align: right;
+            display: block;
+            transition: color 0.3s ease;
+        }
+        .message.ai .message-time, .message.tutor .message-time {
+            text-align: left;
+        }
+
+        /* System Message Style */
+        .system-message {
+            text-align: center;
+            font-size: 12px;
+            color: #847c6f;
+            margin: 15px 0;
+            font-style: italic;
+            transition: color 0.3s ease;
+        }
+
+
+        /* Date Separator */
+        .date-separator {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #847c6f;
+            font-size: 12px;
+            transition: color 0.3s ease;
+        }
+
+        .date-separator:before,
+        .date-separator:after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #c5bdab;
+            transition: border-color 0.3s ease;
+        }
+
+        .date-separator:before {
+            margin-right: 10px;
+        }
+
+        .date-separator:after {
+            margin-left: 10px;
+        }
+
+        /* Chat Input Area */
+        .chat-input-area {
+            padding: 15px 25px;
+            background: linear-gradient(145deg, #e8e3d9, #dcd7cd);
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            border-top: 1px solid rgba(173, 157, 124, 0.1);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+            position: relative;
+            z-index: 1;
+            transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .input-controls-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+
+        /* Image Preview Styles */
+        #imagePreviewContainer {
+            padding: 5px;
+            background: #e2ddd3;
+            border-radius: 12px;
+            box-shadow: inset 1px 1px 3px #cbc6bd, inset -1px -1px 3px #f5f0e5;
+            display: inline-block;
+            max-width: calc(100% - 40px);
+            margin-bottom: 10px;
+            align-self: flex-start;
+            position: relative;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+        #imagePreview {
+            display: block;
+            max-width: 200px; /* Increased from 100px */
+            max-height: 200px; /* Increased from 100px */
+            border-radius: 8px;
+            background-color: #dcd7cd; /* Fallback bg for image loading */
+            transition: background-color 0.3s ease;
+        }
+        #removeImageBtn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e8e3d9;
+            color: #a5584c;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            font-size: 15px;
+            line-height: 20px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 2px 2px 5px #cbc6bd, -2px -2px 5px #f5f0e5;
+            transition: all 0.2s ease;
+        }
+        #removeImageBtn:active {
+            box-shadow: inset 1px 1px 2px #cbc6bd, inset -1px -1px 2px #f5f0e5;
+        }
+
+        .additional-buttons {
+            display: flex;
+            gap: 15px; /* Spacing between buttons within this container */
+            margin-right: 15px; /* Space between this container and the chat input */
+            flex-shrink: 0; /* Prevent these buttons from shrinking */
+        }
+
+        .circle-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #e8e3d9, #d9d4ca);
+            box-shadow:
+                4px 4px 8px #cbc6bd,
+                -4px -4px 8px #f5f0e5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(173, 157, 124, 0.1);
+            position: relative;
+            flex-shrink: 0; /* Prevent individual buttons from shrinking */
+        }
+
+        #attachFileBtn { /* Specific margin for the attach button in its new position */
+            margin-left: 10px;
+        }
+
+        .circle-button:active {
+            box-shadow:
+                inset 3px 3px 6px #cbc6bd,
+                inset -3px -3px 6px #f5f0e5;
+        }
+         .circle-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow:
+                inset 2px 2px 4px #cbc6bd,
+                inset -2px -2px 4px #f5f0e5;
+        }
+
+        .circle-button svg { /* General style for SVGs in circle buttons */
+            width: 20px;
+            height: 20px;
+            fill: #847c6f;
+            transition: fill 0.3s ease;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 22px;
+            background: #e2ddd3;
+            color: #5a5346;
+            outline: none;
+            font-size: 14px;
+            box-shadow:
+                inset 4px 4px 8px #cbc6bd,
+                inset -4px -4px 8px #f5f0e5;
+            border: 1px solid rgba(173, 157, 124, 0.1);
+            transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            width: 100%;
+        }
+         .chat-input::placeholder {
+            color: #847c6f;
+            transition: color 0.3s ease;
+        }
+
+
+        .send-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #d9cebc, #c8beac);
+            box-shadow:
+                4px 4px 8px #b5ac9a,
+                -4px -4px 8px #e5dcc8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(173, 157, 124, 0.2);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+
+        .send-button:active {
+            box-shadow:
+                inset 3px 3px 6px #b5ac9a,
+                inset -3px -3px 6px #e5dcc8;
+        }
+         .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+             box-shadow:
+                inset 2px 2px 4px #cbc6bd,
+                inset -2px -2px 4px #f5f0e5;
+        }
+
+        .send-icon {
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 12px solid #5a5346;
+            margin-left: 4px;
+            transition: border-left-color 0.3s ease;
+        }
+
+        /* Custom Scrollbar */
+        .chat-messages::-webkit-scrollbar,
+        .settings-panel-content::-webkit-scrollbar,
+        .modal-popup-content-scrollable::-webkit-scrollbar { /* Apply to popups too */
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track,
+        .settings-panel-content::-webkit-scrollbar-track,
+        .modal-popup-content-scrollable::-webkit-scrollbar-track {
+            background: transparent;
+            margin: 5px 0;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb,
+        .settings-panel-content::-webkit-scrollbar-thumb,
+        .modal-popup-content-scrollable::-webkit-scrollbar-thumb {
+            background-color: #c5bdab;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: background-color 0.3s ease;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover,
+        .settings-panel-content::-webkit-scrollbar-thumb:hover,
+        .modal-popup-content-scrollable::-webkit-scrollbar-thumb:hover {
+            background-color: #b9b1a0;
+        }
+
+
+        /* Golden shimmer effect for chat app background */
+        .chat-app::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(255, 215, 0, 0.03) 25%,
+                rgba(255, 215, 0, 0.06) 50%,
+                rgba(255, 215, 0, 0.03) 75%,
+                transparent 100%
+            );
+            border-radius: 20px;
+            z-index: 0;
+            pointer-events: none;
+            transition: background 0.3s ease;
+        }
+
+        /* Shimmer effect for buttons on hover */
+        .circle-button::before,
+        .send-button::before,
+        .header-icon-button::before,
+        .settings-button::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: linear-gradient(
+                135deg,
+                transparent 30%,
+                rgba(255, 215, 0, 0.15) 50%,
+                transparent 70%
+            );
+            opacity: 0;
+            transition: opacity 0.3s, background 0.3s ease;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .circle-button:hover::before,
+        .send-button:hover::before,
+        .header-icon-button:hover::before,
+        .settings-button:hover::before {
+            opacity: 1;
+        }
+         .circle-button:disabled::before,
+        .send-button:disabled::before {
+            opacity: 0 !important;
+        }
+
+        /* General Modal Popup Styles */
+        .modal-popup-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 11; /* Above settings panel */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-out, visibility 0s linear 0.2s;
+            pointer-events: none;
+        }
+        .modal-popup-overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0s, 0s;
+            pointer-events: auto;
+        }
+
+        .modal-popup-container {
+            background: linear-gradient(145deg, #eae5db, #dcd7cd);
+            border-radius: 15px;
+            box-shadow: 10px 10px 25px #c4c0b7, -10px -10px 25px #fcf7ed;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80%;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95);
+            transition: transform 0.2s ease-out, background 0.3s ease, box-shadow 0.3s ease;
+        }
+        .modal-popup-overlay.is-open .modal-popup-container {
+             transform: scale(1);
+        }
+
+        .modal-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .modal-popup-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #5a5346;
+            transition: color 0.3s ease;
+        }
+        .modal-popup-close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #847c6f;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+        .modal-popup-close:hover {
+            color: #5a5346;
+        }
+        .modal-popup-content-scrollable {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 10px; /* Space for scrollbar */
+            margin-right: -10px; /* Counteract padding for scrollbar */
+        }
+
+        /* Styles for Learner Stats content */
+        #learnerStatsContent h4 {
+            font-size: 15px;
+            color: #5a5346;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #c5bdab;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+        #learnerStatsContent h4:first-child {
+            margin-top: 0;
+        }
+        #learnerStatsContent ul {
+            list-style-type: none; /* Remove default bullets */
+            padding-left: 0;
+            margin-bottom: 10px;
+        }
+        #learnerStatsContent li {
+            font-size: 13px;
+            color: #5a5346;
+            margin-bottom: 6px;
+            line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+        #learnerStatsContent li strong {
+            font-weight: 600;
+        }
+        #learnerStatsContent p {
+            font-size: 13px;
+            color: #5a5346;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+        #learnerStatsContent em {
+            color: #847c6f;
+            transition: color 0.3s ease;
+        }
+        #learnerStatsContent hr {
+            border: none;
+            border-top: 1px solid #c5bdab;
+            margin: 15px 0;
+            transition: border-color 0.3s ease;
+        }
+
+
+        /* --- Dark Mode Styles --- */
+        body.dark-mode {
+            background-color: #2a2c31;
+        }
+
+        .dark-mode .chat-app {
+            background: linear-gradient(145deg, #3a3d42, #2f3136);
+            box-shadow: 15px 15px 30px #25272b, -15px -15px 30px #45494f;
+        }
+
+        .dark-mode .chat-header {
+            background: linear-gradient(145deg, #383b40, #2e3035);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .dark-mode .agent-name { color: #e0e0e0; }
+        .dark-mode .agent-status { color: #a0a0a0; }
+        /* .agent-status.reachable/not-reachable colors are absolute, so they remain */
+        .dark-mode .agent-status.tutoring { color: #64B5F6; } /* Lighter blue for dark mode */
+
+
+        .dark-mode .header-icon-button {
+            background: linear-gradient(145deg, #36393f, #2c2e33);
+            box-shadow: 4px 4px 8px #232528, -4px -4px 8px #43474c;
+        }
+        .dark-mode .header-icon-button svg { fill: #b0b0b0; }
+        .dark-mode .header-icon-button:active {
+            box-shadow: inset 3px 3px 6px #232528, inset -3px -3px 6px #43474c;
+        }
+
+        .dark-mode .settings-panel {
+            background: linear-gradient(145deg, #3a3d42, #2f3136);
+            box-shadow: 8px 8px 16px #25272b, -8px -8px 16px #45494f;
+        }
+         .dark-mode .settings-tabs {
+            border-bottom-color: #4a4d52;
+        }
+        .dark-mode .settings-tab-button {
+            color: #909090;
+        }
+        .dark-mode .settings-tab-button:hover {
+            color: #c0c0c0;
+        }
+        .dark-mode .settings-tab-button.active {
+            color: #e0e0e0;
+            border-bottom-color: #e0e0e0;
+        }
+
+        .dark-mode .settings-label { color: #c0c0c0; }
+        .dark-mode .settings-group-title {
+            color: #909090;
+            border-bottom-color: #4a4d52;
+        }
+        .dark-mode .settings-input {
+            background: #303338;
+            color: #d0d0d0;
+            box-shadow: inset 2px 2px 4px #26282c, inset -2px -2px 4px #3a3c40;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .dark-mode .settings-input::placeholder { color: #707070; }
+        .dark-mode .settings-panel select.settings-input {
+             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23B0B0B0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22/%3E%3C/svg%3E');
+        }
+
+
+        .dark-mode .toggle-slider {
+            background: #2f3136;
+            box-shadow: inset 2px 2px 4px #25272b, inset -2px -2px 4px #45494f;
+        }
+        .dark-mode .toggle-slider:before {
+            background: linear-gradient(145deg, #404348, #303237);
+        }
+        .dark-mode input:checked + .toggle-slider {
+            background: linear-gradient(145deg, #527FFF, #4065CC); /* Using a blue accent for checked toggles in dark mode */
+        }
+        .dark-mode input:checked + .toggle-slider:before {
+            background: linear-gradient(145deg, #608BFF, #5075DD);
+        }
+
+        .dark-mode .settings-button {
+            background: linear-gradient(145deg, #36393f, #2c2e33);
+            box-shadow: 3px 3px 6px #232528, -3px -3px 6px #43474c;
+            color: #c0c0c0;
+        }
+        .dark-mode .settings-button:active {
+            box-shadow: inset 2px 2px 4px #232528, inset -2px -2px 4px #43474c;
+        }
+        .dark-mode .settings-button.danger {
+            background: linear-gradient(145deg, #5e3939, #4e2f2f);
+            box-shadow: 3px 3px 6px #3e2020, -3px -3px 6px #6e4848;
+            color: #f0b0b0;
+        }
+        .dark-mode .settings-button.danger:active {
+            box-shadow: inset 2px 2px 4px #3e2020, inset -2px -2px 4px #6e4848;
+        }
+
+        .dark-mode .status-text.checking { color: #a0a0a0; }
+        .dark-mode .status-text.success { color: #66bb6a; }
+        .dark-mode .status-text.error { color: #ef5350; }
+
+        /* Dark Mode About Section (in modal) */
+        .dark-mode .modal-popup .settings-about-text {
+            color: #b0b0b0;
+        }
+        .dark-mode .modal-popup .settings-about-text a {
+            color: #909090;
+            border-bottom-color: #707070;
+        }
+        .dark-mode .modal-popup .settings-about-text a:hover {
+            color: #c0c0c0;
+            border-bottom-color: #a0a0a0;
+        }
+
+        .dark-mode .chat-messages {
+            background: linear-gradient(125deg, #33363b, #2b2d31);
+            box-shadow: inset 5px 5px 15px #232528, inset -5px -5px 15px #404449;
+        }
+        .dark-mode .message { color: #d0d0d0; } /* Default text color inside messages */
+
+        .dark-mode .message-image-preview { background-color: #2b2d31; }
+        .dark-mode .message-image-fallback-icon { fill: #808080; }
+
+        .dark-mode .message.ai .message-content code,
+        .dark-mode .message.tutor .message-content code {
+            background-color: #282a2e; /* Slightly darker than message bg */
+            color: #cccccc;
+            border: 1px solid #3a3d42;
+        }
+        .dark-mode .message.ai .message-content pre,
+        .dark-mode .message.tutor .message-content pre {
+            background-color: #25272b; /* Even darker for block */
+            color: #cccccc;
+            border: 1px solid #3a3d42;
+        }
+        .dark-mode .message.ai .message-content pre code,
+        .dark-mode .message.tutor .message-content pre code {
+            background-color: transparent;
+            border: none;
+        }
+
+
+        .dark-mode .message.user {
+            background: linear-gradient(145deg, #4a5058, #3e434a);
+            color: #e0e0e0;
+            box-shadow: 5px 5px 15px #303338, -5px -5px 15px #50555d;
+            border: 1px solid rgba(0,0,0, 0.3);
+        }
+        .dark-mode .message.ai, .dark-mode .message.tutor {
+            background: linear-gradient(145deg, #3c3f45, #32353a);
+            color: #d0d0d0;
+            box-shadow: 5px 5px 15px #282a2e, -5px -5px 15px #484c52;
+            border: 1px solid rgba(0,0,0, 0.2);
+        }
+        .dark-mode .message-time { color: #808080; }
+        .dark-mode .system-message { color: #909090; }
+
+        .dark-mode .date-separator { color: #808080; }
+        .dark-mode .date-separator:before, .dark-mode .date-separator:after {
+            border-bottom-color: #4a4d52;
+        }
+
+        .dark-mode .chat-input-area {
+            background: linear-gradient(145deg, #383b40, #2e3035);
+            border-top: 1px solid rgba(0,0,0, 0.2);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
+        }
+        .dark-mode #imagePreviewContainer {
+            background: #303338;
+            box-shadow: inset 1px 1px 3px #26282c, inset -1px -1px 3px #3a3c40;
+        }
+        .dark-mode #imagePreview { background-color: #2b2d31; }
+        .dark-mode #removeImageBtn {
+            background: #383b40;
+            color: #d48075;
+            box-shadow: 2px 2px 5px #232528, -2px -2px 5px #43474c;
+        }
+        .dark-mode #removeImageBtn:active {
+            box-shadow: inset 1px 1px 2px #232528, inset -1px -1px 2px #43474c;
+        }
+
+        .dark-mode .circle-button {
+            background: linear-gradient(145deg, #36393f, #2c2e33);
+            box-shadow: 4px 4px 8px #232528, -4px -4px 8px #43474c;
+            border: 1px solid rgba(0,0,0, 0.2);
+        }
+        .dark-mode .circle-button svg { fill: #a0a0a0; }
+        .dark-mode .circle-button:active {
+            box-shadow: inset 3px 3px 6px #232528, inset -3px -3px 6px #43474c;
+        }
+        .dark-mode .circle-button:disabled {
+            box-shadow: inset 2px 2px 4px #232528, inset -2px -2px 4px #43474c;
+        }
+
+        .dark-mode .chat-input {
+            background: #303338;
+            color: #d0d0d0;
+            box-shadow: inset 4px 4px 8px #26282c, inset -4px -4px 8px #3a3c40;
+            border: 1px solid rgba(0,0,0, 0.1);
+        }
+        .dark-mode .chat-input::placeholder { color: #808080; }
+
+        .dark-mode .send-button {
+            background: linear-gradient(145deg, #4a5058, #3e434a);
+            box-shadow: 4px 4px 8px #303338, -4px -4px 8px #50555d;
+            border: 1px solid rgba(0,0,0, 0.3);
+        }
+        .dark-mode .send-button:active {
+            box-shadow: inset 3px 3px 6px #303338, inset -3px -3px 6px #50555d;
+        }
+        .dark-mode .send-button:disabled {
+            box-shadow: inset 2px 2px 4px #232528, inset -2px -2px 4px #43474c;
+        }
+        .dark-mode .send-icon { border-left-color: #d0d0d0; }
+
+        .dark-mode .chat-messages::-webkit-scrollbar-thumb,
+        .dark-mode .settings-panel-content::-webkit-scrollbar-thumb,
+        .dark-mode .modal-popup-content-scrollable::-webkit-scrollbar-thumb {
+            background-color: #50555d;
+        }
+        .dark-mode .chat-messages::-webkit-scrollbar-thumb:hover,
+        .dark-mode .settings-panel-content::-webkit-scrollbar-thumb:hover,
+        .dark-mode .modal-popup-content-scrollable::-webkit-scrollbar-thumb:hover {
+            background-color: #60666e;
+        }
+
+        /* Dark Mode Shimmer */
+        .dark-mode .chat-app::before {
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.015) 25%, /* Lighter, less saturated shimmer */
+                rgba(255, 255, 255, 0.03) 50%,
+                rgba(255, 255, 255, 0.015) 75%,
+                transparent 100%
+            );
+        }
+
+        .dark-mode .circle-button::before,
+        .dark-mode .send-button::before,
+        .dark-mode .header-icon-button::before,
+        .dark-mode .settings-button::before {
+            background: linear-gradient(
+                135deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.08) 50%, /* Lighter shimmer for buttons */
+                transparent 70%
+            );
+        }
+
+        /* Dark Mode Modal Popup Styles */
+        .dark-mode .modal-popup-overlay {
+            background-color: rgba(0, 0, 0, 0.5); /* Slightly darker backdrop */
+        }
+        .dark-mode .modal-popup-container {
+            background: linear-gradient(145deg, #3a3d42, #2f3136);
+            box-shadow: 10px 10px 25px #25272b, -10px -10px 25px #45494f;
+        }
+        .dark-mode .modal-popup-title {
+            color: #e0e0e0;
+        }
+        .dark-mode .modal-popup-close {
+            color: #a0a0a0;
+        }
+        .dark-mode .modal-popup-close:hover {
+            color: #e0e0e0;
+        }
+        /* Dark mode for Learner Stats content */
+        .dark-mode #learnerStatsContent h4 {
+            color: #c0c0c0;
+            border-bottom-color: #4a4d52;
+        }
+        .dark-mode #learnerStatsContent li,
+        .dark-mode #learnerStatsContent p {
+            color: #b0b0b0;
+        }
+        .dark-mode #learnerStatsContent em {
+            color: #909090;
+        }
+        .dark-mode #learnerStatsContent hr {
+            border-top-color: #4a4d52;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="chat-app">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="agent-info">
+                <div>
+                    <div class="agent-name" data-translate-key="agentName">TUTORAI</div>
+                    <div class="agent-status" data-translate-key="agentStatusActive">Active</div>
+                </div>
+            </div>
+            <div class="header-icon-button" id="settingsButton" title="Settings">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="12" cy="5" r="2"/>
+                    <circle cx="12" cy="12" r="2"/>
+                    <circle cx="12" cy="19" r="2"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Settings Panel (Popup) - Combined View -->
+        <div class="settings-panel" id="settingsPanel">
+            <div class="settings-panel-content">
+                <div class="settings-tabs">
+                    <button class="settings-tab-button active" data-tab="basic" data-translate-key="settingsTabBasic">Basic</button>
+                    <button class="settings-tab-button" data-tab="advanced" data-translate-key="settingsTabAdvanced">Advanced</button>
+                </div>
+
+                <div class="settings-tab-content active" id="settings-tab-basic">
+                    <div class="settings-row">
+                        <div class="settings-label" data-translate-key="darkModeLabel">Dark Mode</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label" data-translate-key="streamResponsesLabel">Stream Responses</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="streamResponsesToggle" checked="">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label" data-translate-key="markdownLabel">Use Markdown</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="markdownToggle" checked="">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-group-title" data-translate-key="ollamaStatusTitle">Ollama Status</div>
+                    <div class="settings-row action-row">
+                        <button id="checkOllamaStatusBtn" class="settings-button" data-translate-key="checkOllamaBtn">Check Ollama</button>
+                        <span id="ollamaStatusText" class="status-text"></span>
+                    </div>
+
+                    <div class="settings-group-title" data-translate-key="applicationInfoTitle">Application Info</div>
+                     <div class="settings-row action-row">
+                        <button id="showAboutBtn" class="settings-button" data-translate-key="showAboutBtn">About TUTORAI</button>
+                    </div>
+                </div>
+
+                <div class="settings-tab-content" id="settings-tab-advanced">
+                    <div class="settings-group-title" data-translate-key="ollamaConfigTitle">Ollama Configuration</div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="ollamaEndpoint" data-translate-key="ollamaEndpointLabel">Endpoint URL</label>
+                        <input type="text" id="ollamaEndpoint" class="settings-input" placeholder="http://localhost:11434/api/generate">
+                    </div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="ollamaModel" data-translate-key="ollamaModelLabel">Model Name</label>
+                        <input type="text" id="ollamaModel" class="settings-input" placeholder="gemma3:4b">
+                    </div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="ollamaTemperature" data-translate-key="ollamaTemperatureLabel">Temperature</label>
+                        <input type="number" id="ollamaTemperature" class="settings-input" min="0.1" max="1.0" step="0.1">
+                    </div>
+
+                    <div class="settings-group-title" data-translate-key="chatDataTitle">Chat Data</div>
+                    <div class="settings-row action-row">
+                        <button id="clearChatHistoryBtn" class="settings-button danger" data-translate-key="clearChatHistoryBtn">Clear Chat History</button>
+                    </div>
+
+                    <!-- TUTORING FEATURE SETTINGS -->
+                    <div class="settings-group-title" data-translate-key="learningTitle">Learning</div>
+                    <div class="settings-row action-row">
+                        <button id="clearLearningProgressBtn" class="settings-button danger" data-translate-key="clearLearningProgressBtn">Clear Learning Progress</button>
+                    </div>
+                    <!-- END TUTORING FEATURE SETTINGS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- About Popup -->
+        <div id="aboutPopupOverlay" class="modal-popup-overlay">
+            <div class="modal-popup-container">
+                <div class="modal-popup-header">
+                    <h3 class="modal-popup-title" data-translate-key="aboutTitle">About TUTORAI</h3>
+                    <span class="modal-popup-close" id="closeAboutPopup">&times;</span>
+                </div>
+                <div class="modal-popup-content-scrollable">
+                    <div class="settings-about-text">
+                        <p data-translate-key="aboutP1">TUTORAI is a lightweight, privacy-focused chat application designed for interacting with local AI models like Ollama. It also features an integrated language learning tutor.</p>
+                        <p data-translate-key="aboutP2">Remarkably, this entire application, including all styles and functionalities, is contained within a single HTML file, keeping its size under 200KB!</p>
+                        <p>
+                            <span data-translate-key="aboutAuthorLabel">Author:</span> VOVSn |
+                            <span data-translate-key="aboutGithubLabel">GitHub:</span> <a href="https://github.com/VOVSn" target="_blank" rel="noopener noreferrer" data-translate-key="aboutGithubLinkText">github.com/VOVSn</a>
+                        </p>
+                        <p data-translate-key="aboutP4">This project is open-source. Contributions are welcome!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learner Stats Popup -->
+        <div id="learnerStatsPopupOverlay" class="modal-popup-overlay">
+            <div class="modal-popup-container">
+                <div class="modal-popup-header">
+                    <h3 class="modal-popup-title" data-translate-key="learnerStatsTitle">Your Learning Progress</h3>
+                    <span class="modal-popup-close" id="closeLearnerStatsPopup">&times;</span>
+                </div>
+                <div class="modal-popup-content-scrollable">
+                    <div id="learnerStatsContent">
+                        <!-- Stats will be populated here by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Chat Messages -->
+        <div class="chat-messages">
+            <!-- Messages will be appended here -->
+        </div>
+
+        <!-- Chat Input Area -->
+        <div class="chat-input-area">
+             <!-- Image Preview Area -->
+            <div id="imagePreviewContainer" style="display: none;">
+                <img id="imagePreview" src="#" alt="Image preview"/>
+                <button id="removeImageBtn" title="Remove image">×</button>
+            </div>
+            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+
+            <div class="input-controls-row">
+                <div class="additional-buttons">
+                    <!-- TUTORING FEATURE MAIN BUTTON -->
+                    <div class="circle-button" id="startStudyBtnMain" title="Start Study Session">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+                        </svg>
+                    </div>
+                    <!-- LEARNER STATS BUTTON -->
+                    <div class="circle-button" id="showLearnerStatsBtn" title="View Learning Progress">
+                        <svg viewBox="0 0 24 24" width="20" height="20">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <input type="text" class="chat-input" placeholder="Ask the AI something...">
+
+                <div class="circle-button" id="attachFileBtn" title="Upload Image">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    </svg>
+                </div>
+
+                <div class="send-button" title="Send Message">
+                    <div class="send-icon"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        // --- Translations (English Only) ---
+        const translations = {
+            en: {
+                pageTitle: "TUTORAI Chat",
+                agentName: "TUTORAI",
+                agentStatusActive: "Active",
+                agentStatusTyping: "Typing...",
+                agentStatusNotReachable: "Not Reachable",
+                agentStatusTutoring: "Tutoring Mode",
+                settingsTitle: "Settings",
+                settingsTabBasic: "Basic",
+                settingsTabAdvanced: "Advanced",
+                darkModeLabel: "Dark Mode",
+                streamResponsesLabel: "Stream Responses",
+                markdownLabel: "Use Markdown",
+                ollamaStatusTitle: "Ollama Status",
+                applicationInfoTitle: "Application Info", // New
+                showAboutBtn: "About TUTORAI", // New
+                ollamaConfigTitle: "Ollama Configuration",
+                ollamaEndpointLabel: "Endpoint URL",
+                ollamaModelLabel: "Model Name",
+                ollamaTemperatureLabel: "Temperature (0.1-1.0)",
+                checkOllamaBtn: "Check Ollama",
+                chatDataTitle: "Chat Data",
+                clearChatHistoryBtn: "Clear Chat History",
+                ollamaEndpointPlaceholder: "http://localhost:11434/api/generate",
+                ollamaModelPlaceholder: "gemma3:4b",
+                ollamaStatusChecking: "Checking...",
+                ollamaStatusRunning: "Ollama Running",
+                ollamaStatusOKUnexpected: "Reachable (OK, unexpected content)",
+                ollamaStatusReachableWithCode: "Reachable (Status: {status})",
+                ollamaStatusNotReachable: "Not Reachable",
+                ollamaStatusInvalidURL: "Invalid URL",
+                attachFileTitle: "Upload Image",
+                chatInputPlaceholder: "Ask TUTORAI something...",
+                sendMessageTitle: "Send Message",
+                dateToday: "Today",
+                dateYesterday: "Yesterday",
+                systemMsgLoadedFromFile: "Loaded history from chat_history.json. Copied to browser storage for this session.",
+                systemMsgLoadedFromStorage: "Loaded history from browser's local storage.",
+                systemMsgNoHistory: "No chat history found. Start chatting to save messages!",
+                systemMsgHistoryCleared: "Chat history has been cleared. Start a new conversation!",
+                ollamaError: "Error communicating with AI: {error}",
+                confirmClearHistory: "Are you sure you want to clear all chat history from your browser's storage? This action cannot be undone.",
+                ollamaPromptSystem: "You are a helpful AI assistant named TUTORAI. The user is communicating in English. Your task is to provide a helpful and concise response to the user's current query, strictly in English. Use Markdown for formatting if appropriate (e.g., lists, bold, italics). If an image is provided, analyze it in conjunction with the text prompt.",
+                ollamaPromptUserLabel: "User",
+                ollamaPromptAiLabel: "TUTORAI",
+                userImagePreviewAlt: "User image preview",
+
+                // --- About Section Translations ---
+                aboutTitle: "About TUTORAI",
+                aboutP1: "TUTORAI is a lightweight, privacy-focused chat application designed for interacting with local AI models like Ollama. It also features an integrated language learning tutor.",
+                aboutP2: "Remarkably, this entire application, including all styles and functionalities, is contained within a single HTML file, keeping its size under 200KB!",
+                aboutAuthorLabel: "Author:",
+                aboutGithubLabel: "GitHub:",
+                aboutGithubLinkText: "github.com/VOVSn",
+                aboutP4: "This project is open-source. Contributions are welcome!",
+
+                // --- Learner Stats Translations ---
+                learnerStatsTitle: "Your Learning Progress",
+                viewLearningProgressTitle: "View Learning Progress", // For the button title
+                noLearningDataFound: "No learning data found. Start a study session to see your progress!",
+                languagesPracticedTitle: "Languages Practiced",
+                noLanguagesPracticedYet: "You haven't practiced any languages yet.",
+                currentLearningFocusTitle: "Current Learning Focus",
+                lessonHistoryTitle: "Recent Lesson History",
+                errorLoadingLearningData: "Error loading learning data.",
+
+
+                // --- TUTORING TRANSLATIONS ---
+                learningTitle: "Learning",
+                studySessionBtn: "Start Study Session",
+                studySessionBtnContinue: "Study: {learn_lang}",
+                clearLearningProgressBtn: "Clear Learning Progress",
+                confirmClearLearningProgress: "Are you sure you want to clear all your learning progress? This will delete your entire learning history and end any active lesson. This action cannot be undone.",
+                learningProgressCleared: "Learning progress cleared. Any active session has ended.",
+                tutorWelcomeBack: "Welcome back! Last time you were practicing {last_learn_lang} by translating sentences from {last_input_lang} to {last_output_lang}. How would you like to proceed today? (e.g., 'continue', 'learn Spanish', 'translate English to French')",
+                tutorAskLanguageDirection: "Okay! What language would you like to learn or practice today, and how would you like to translate? (e.g., 'I want to learn Spanish by translating from English to Spanish' or 'Practice my French understanding')",
+                tutorAskDirectionClarification: "Okay, {learn_lang}! And would you like to translate *from {learn_lang} to {known_lang}* (practice understanding), or *from {known_lang} to {learn_lang}* (practice producing sentences)?",
+                tutorUnclearIntent: "I'm sorry, I didn't quite catch that. Could you please rephrase?",
+                tutorReadyToStartLesson: "Great! Let's start your {learn_lang} lesson, translating from {input_lang} to {output_lang}. I'll give you 5 sentences. Please provide your translations one by one.",
+                tutorTranslateThis: "Please translate this sentence to {output_lang}:",
+                tutorLessonComplete: "Lesson complete! Well done.",
+                tutorExiting: "Exiting tutoring mode.",
+                tutorErrorGeneral: "An error occurred in the tutoring session. Please try again.",
+                tutorErrorOllamaResponse: "Sorry, I couldn't understand the response from the learning model. Please try again.",
+                tutorErrorNoSentences: "Sorry, I couldn't get any sentences for you right now. Please try again later.",
+                tutorChatInputPlaceholder: "Enter your response or translation...",
+                tutorChatInputTranslationPlaceholder: "Enter your translation to {output_lang}...",
+                // --- END TUTORING TRANSLATIONS ---
+            }
+        };
+        const currentLanguage = 'en';
+
+        // --- DOM Elements ---
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const settingsTabButtons = document.querySelectorAll('.settings-tab-button');
+        const settingsTabContents = document.querySelectorAll('.settings-tab-content');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const markdownToggle = document.getElementById('markdownToggle');
+        const streamResponsesToggle = document.getElementById('streamResponsesToggle');
+        const body = document.body;
+        const ollamaEndpointInput = document.getElementById('ollamaEndpoint');
+        const ollamaModelInput = document.getElementById('ollamaModel');
+        const ollamaTemperatureInput = document.getElementById('ollamaTemperature');
+        const checkOllamaStatusBtn = document.getElementById('checkOllamaStatusBtn');
+        const ollamaStatusText = document.getElementById('ollamaStatusText');
+        const clearChatHistoryBtn = document.getElementById('clearChatHistoryBtn');
+        const chatMessagesContainer = document.querySelector('.chat-messages');
+        const sendButton = document.querySelector('.send-button');
+        const chatInput = document.querySelector('.chat-input');
+        const agentNameDiv = document.querySelector('.agent-name');
+        const agentStatusDiv = document.querySelector('.agent-status');
+
+        const attachFileBtn = document.getElementById('attachFileBtn');
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+
+        // About Popup Elements
+        const showAboutBtn = document.getElementById('showAboutBtn');
+        const aboutPopupOverlay = document.getElementById('aboutPopupOverlay');
+        const closeAboutPopup = document.getElementById('closeAboutPopup');
+
+        // Learner Stats Popup Elements
+        const showLearnerStatsBtn = document.getElementById('showLearnerStatsBtn');
+        const learnerStatsPopupOverlay = document.getElementById('learnerStatsPopupOverlay');
+        const closeLearnerStatsPopup = document.getElementById('closeLearnerStatsPopup');
+        const learnerStatsContent = document.getElementById('learnerStatsContent');
+
+        // --- Constants for LocalStorage and Ollama ---
+        const OLLAMA_ENDPOINT_KEY = 'ollamaUserEndpoint';
+        const OLLAMA_MODEL_KEY = 'ollamaUserModel';
+        const OLLAMA_TEMPERATURE_KEY = 'ollamaTemperatureSetting';
+        const DEFAULT_OLLAMA_TEMPERATURE = 0.3;
+        const CHAT_HISTORY_KEY = 'TutorAiChatHistory';
+        const MARKDOWN_ENABLED_KEY = 'tutorAiChatMarkdownEnabled';
+        const DARK_MODE_KEY = 'tutorAiChatDarkModeEnabled';
+        const ACTIVE_SETTINGS_TAB_KEY = 'tutorAiActiveSettingsTab';
+        const MAX_HISTORY_FOR_PROMPT = 6;
+        const OLLAMA_CHECK_INTERVAL = 60000;
+        const PREVIEW_IMAGE_MAX_DIMENSION_PX = 300;
+        const OLLAMA_IMAGE_MAX_DIMENSION_PX = 512;
+        const IMAGE_QUALITY_PREVIEW = 0.85;
+        const IMAGE_QUALITY_OLLAMA = 0.9;
+
+
+        // --- Application State ---
+        let isCheckingOllama = false;
+        let lastMessageDateString = '';
+        let isAiResponding = false;
+        let ollamaHeaderCheckIntervalId = null;
+        let isOllamaReachableForHeader = true;
+
+        let currentOriginalImageBase64DataUri = null;
+        let currentResizedPreviewDataUri = null;
+
+        // --- TUTORING FEATURE ---
+        const startStudyBtnMain = document.getElementById('startStudyBtnMain');
+        const clearLearningProgressBtn = document.getElementById('clearLearningProgressBtn');
+        const USER_STATE_KEY = 'tutorAiLanguageLearningUserState';
+        const KNOWN_LANG = 'english';
+        let user_state = null;
+        let isTutoringActive = false;
+        let isTutorResponding = false;
+        let currentLessonConfig = { learn_lang: null, input_lang: null, output_lang: null };
+        let lesson_sentences = [];
+        let current_sentence_index = 0;
+        let lesson_interactions = [];
+        let expectedTutorResponseHandler = null;
+        // --- END TUTORING FEATURE ---
+
+
+        // --- Translation Functions ---
+        function getTranslation(key, replacements = {}) {
+            let translation = translations[currentLanguage]?.[key] || key;
+            for (const placeholder in replacements) {
+                translation = translation.replace(`{${placeholder}}`, replacements[placeholder]);
+            }
+            return translation;
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-translate-key]').forEach(el => {
+                const key = el.dataset.translateKey;
+                const isButton = el.tagName === 'INPUT' && el.type === 'button' || el.tagName === 'BUTTON';
+                const isTitleElement = el.tagName === 'TITLE';
+                const isPlaceholder = el.hasAttribute('placeholder') && el.tagName === 'INPUT';
+
+                if (el.id === 'startStudyBtnMain') return; // Handled by updateStudyButtonText
+
+                if (isButton || isTitleElement) {
+                    el.textContent = getTranslation(key);
+                } else if (isPlaceholder) {
+                    // Placeholders are handled specifically below if needed
+                } else {
+                    el.textContent = getTranslation(key);
+                }
+            });
+
+            if (document.querySelector('title')) {
+                 document.querySelector('title').textContent = getTranslation('pageTitle');
+            }
+            if (agentNameDiv) agentNameDiv.textContent = getTranslation('agentName');
+            setAgentStatus(isAiResponding ? 'typing' : (isTutoringActive ? 'tutoring' : 'active'));
+
+            if (settingsButton) settingsButton.title = getTranslation('settingsTitle');
+
+            if (ollamaEndpointInput) ollamaEndpointInput.placeholder = getTranslation('ollamaEndpointPlaceholder');
+            if (ollamaModelInput) ollamaModelInput.placeholder = getTranslation('ollamaModelPlaceholder');
+
+            if (attachFileBtn) attachFileBtn.title = getTranslation('attachFileTitle');
+            if (chatInput) chatInput.placeholder = isTutoringActive ? getTranslation('tutorChatInputPlaceholder') : getTranslation('chatInputPlaceholder');
+            if (sendButton) sendButton.title = getTranslation('sendMessageTitle');
+            if (showLearnerStatsBtn) showLearnerStatsBtn.title = getTranslation('viewLearningProgressTitle');
+
+
+            if (ollamaStatusText && ollamaStatusText.dataset.key) {
+                const currentStatusKey = ollamaStatusText.dataset.key;
+                const currentReplacements = JSON.parse(ollamaStatusText.dataset.replacements || '{}');
+                ollamaStatusText.textContent = getTranslation(currentStatusKey, currentReplacements);
+            } else if (ollamaStatusText && !ollamaStatusText.textContent) {
+                 ollamaStatusText.textContent = '';
+            }
+            if (!isAiResponding && !isTutoringActive) {
+                updateAgentHeaderStatus();
+            }
+            updateStudyButtonText();
+        }
+
+
+        // --- Utility Functions ---
+        function scrollToBottom() {
+            if (chatMessagesContainer) {
+                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+            }
+        }
+
+        function updateAgentHeaderStatus() {
+            if (isTutoringActive) {
+                if (agentStatusDiv) {
+                    agentStatusDiv.classList.remove('reachable', 'not-reachable');
+                    agentStatusDiv.classList.add('tutoring');
+                    agentStatusDiv.textContent = getTranslation('agentStatusTutoring');
+                }
+                return;
+            }
+            if (agentStatusDiv) {
+                agentStatusDiv.classList.remove('reachable', 'not-reachable', 'tutoring');
+                if (isOllamaReachableForHeader) {
+                    agentStatusDiv.textContent = getTranslation('agentStatusActive');
+                    agentStatusDiv.classList.add('reachable');
+                } else {
+                    agentStatusDiv.textContent = getTranslation('agentStatusNotReachable');
+                    agentStatusDiv.classList.add('not-reachable');
+                }
+            }
+        }
+
+        function setAgentStatus(statusKey) {
+            if (agentStatusDiv) {
+                agentStatusDiv.classList.remove('reachable', 'not-reachable', 'tutoring');
+                if (statusKey === 'typing') {
+                    agentStatusDiv.textContent = getTranslation('agentStatusTyping');
+                } else if (statusKey === 'tutoring') {
+                    agentStatusDiv.classList.add('tutoring');
+                    agentStatusDiv.textContent = getTranslation('agentStatusTutoring');
+                } else {
+                    updateAgentHeaderStatus();
+                }
+            }
+        }
+
+        // --- Popup Management ---
+        function openPopup(overlayElement) {
+            if (settingsPanel.classList.contains('is-open')) {
+                settingsPanel.classList.remove('is-open');
+            }
+            if (overlayElement) overlayElement.classList.add('is-open');
+        }
+        function closePopup(overlayElement) {
+            if (overlayElement) overlayElement.classList.remove('is-open');
+        }
+
+        // About Popup Logic
+        if (showAboutBtn && aboutPopupOverlay && closeAboutPopup) {
+            showAboutBtn.addEventListener('click', () => openPopup(aboutPopupOverlay));
+            closeAboutPopup.addEventListener('click', () => closePopup(aboutPopupOverlay));
+            aboutPopupOverlay.addEventListener('click', (event) => {
+                if (event.target === aboutPopupOverlay) closePopup(aboutPopupOverlay);
+            });
+        }
+
+        // Learner Stats Popup Logic
+        function displayLearnerStats() {
+            if (!learnerStatsPopupOverlay || !learnerStatsContent) return;
+
+            learnerStatsContent.innerHTML = ''; // Clear previous content
+
+            const storedState = localStorage.getItem(USER_STATE_KEY);
+            if (!storedState) {
+                learnerStatsContent.innerHTML = `<p>${getTranslation('noLearningDataFound')}</p>`;
+                openPopup(learnerStatsPopupOverlay);
+                return;
+            }
+
+            try {
+                const state = JSON.parse(storedState);
+                let html = '';
+
+                if (state.language_proficiency && Object.keys(state.language_proficiency).length > 0) {
+                    html += `<h4>${getTranslation('languagesPracticedTitle')}</h4><ul>`;
+                    for (const lang in state.language_proficiency) {
+                        const prof = state.language_proficiency[lang];
+
+                        let accuracyToDisplay = 0;
+                        if (prof.overall_accuracy_estimate) {
+                            let val = parseFloat(prof.overall_accuracy_estimate);
+                            if (isNaN(val)) {
+                                val = 0;
+                            }
+
+                            if (val > 1 && val <= 100) { // e.g., 70 for 70%
+                                accuracyToDisplay = val;
+                            } else if (val >= 0 && val <= 1) { // e.g., 0.7 for 70%
+                                accuracyToDisplay = val * 100;
+                            } else if (val > 100) { // Erroneously large, e.g. 7000
+                                accuracyToDisplay = 100; // Cap at 100%
+                            } else { // Negative or other unexpected
+                                accuracyToDisplay = 0;
+                            }
+                        }
+
+                        html += `<li><strong>${lang.charAt(0).toUpperCase() + lang.slice(1)}:</strong>
+                                    Level ${prof.level ? prof.level.toFixed(2) : 'N/A'},
+                                    Accuracy: ${accuracyToDisplay.toFixed(1)}%,
+                                    Streak: ${prof.correct_streak_session || 0}
+                                 </li>`;
+                        if (prof.strengths && prof.strengths.length > 0) {
+                            html += `<p style="font-size:0.9em; margin-left: 20px;"><em>Strengths:</em> ${prof.strengths.join(', ')}</p>`;
+                        }
+                        if (prof.weaknesses && prof.weaknesses.length > 0) {
+                            html += `<p style="font-size:0.9em; margin-left: 20px;"><em>Weaknesses:</em> ${prof.weaknesses.join(', ')}</p>`;
+                        }
+                    }
+                    html += `</ul>`;
+                } else {
+                    html += `<p>${getTranslation('noLanguagesPracticedYet')}</p>`;
+                }
+
+                if (state.learning_focus && Object.keys(state.learning_focus).length > 0) {
+                    let hasFocus = false;
+                    let focusHtml = `<hr><h4>${getTranslation('currentLearningFocusTitle')}</h4>`;
+                    for (const lang in state.learning_focus) {
+                        if (state.learning_focus[lang] && state.learning_focus[lang].length > 0) {
+                            focusHtml += `<p><strong>${lang.charAt(0).toUpperCase() + lang.slice(1)}:</strong> ${state.learning_focus[lang].join(', ')}</p>`;
+                            hasFocus = true;
+                        }
+                    }
+                    if(hasFocus) html += focusHtml;
+                }
+
+                if (state.lesson_history_summary && state.lesson_history_summary.length > 0) {
+                    html += `<hr><h4>${getTranslation('lessonHistoryTitle')}</h4><ul>`;
+                    const recentHistory = state.lesson_history_summary.slice(-5).reverse(); // Show last 5, newest first
+                    recentHistory.forEach(item => {
+                        const d = new Date(item.date_utc);
+                        const dateDisplay = (item.date_utc && !isNaN(d.getTime())) ? d.toLocaleDateString(currentLanguage, { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+                        html += `<li><strong>${dateDisplay} (${item.learn_lang || 'N/A'} via ${item.lang_pair || 'N/A'}):</strong> ${item.key_takeaway || 'No summary.'}</li>`;
+                    });
+                    html += `</ul>`;
+                }
+
+                learnerStatsContent.innerHTML = html || `<p>${getTranslation('noLearningDataFound')}</p>`;
+                openPopup(learnerStatsPopupOverlay);
+
+            } catch (e) {
+                console.error("Error parsing user_state for stats:", e);
+                learnerStatsContent.innerHTML = `<p>${getTranslation('errorLoadingLearningData')}</p>`;
+                openPopup(learnerStatsPopupOverlay);
+            }
+        }
+
+
+        if (showLearnerStatsBtn && learnerStatsPopupOverlay && closeLearnerStatsPopup) {
+            showLearnerStatsBtn.addEventListener('click', displayLearnerStats);
+            closeLearnerStatsPopup.addEventListener('click', () => closePopup(learnerStatsPopupOverlay));
+            learnerStatsPopupOverlay.addEventListener('click', (event) => {
+                if (event.target === learnerStatsPopupOverlay) closePopup(learnerStatsPopupOverlay);
+            });
+        }
+
+
+        // --- Settings Panel Logic ---
+        function setActiveSettingsTab(tabName) {
+            settingsTabButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.tab === tabName);
+            });
+            settingsTabContents.forEach(content => {
+                content.classList.toggle('active', content.id === `settings-tab-${tabName}`);
+            });
+            localStorage.setItem(ACTIVE_SETTINGS_TAB_KEY, tabName);
+        }
+
+        if (settingsButton && settingsPanel) {
+            settingsButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const isOpening = !settingsPanel.classList.contains('is-open');
+                // Close other popups if opening settings
+                if (isOpening) {
+                    closePopup(aboutPopupOverlay);
+                    closePopup(learnerStatsPopupOverlay);
+                }
+                settingsPanel.classList.toggle('is-open');
+
+                if (settingsPanel.classList.contains('is-open')) {
+                    const lastActiveTab = localStorage.getItem(ACTIVE_SETTINGS_TAB_KEY) || 'basic';
+                    setActiveSettingsTab(lastActiveTab);
+                }
+            });
+
+            settingsTabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    setActiveSettingsTab(button.dataset.tab);
+                });
+            });
+
+            document.addEventListener('click', function(event) {
+                if (settingsPanel.classList.contains('is-open')) {
+                    const isClickInsidePanel = settingsPanel.contains(event.target);
+                    const isClickOnButton = settingsButton.contains(event.target) || event.target === settingsButton;
+                    if (!isClickInsidePanel && !isClickOnButton) {
+                        settingsPanel.classList.remove('is-open');
+                    }
+                }
+            });
+        }
+
+        const allInteractiveButtons = document.querySelectorAll('.circle-button, .send-button, .header-icon-button, .settings-button');
+        allInteractiveButtons.forEach(button => {
+            if (button.disabled) return;
+            button.addEventListener('mousedown', () => { if(!button.disabled) button.classList.add('active')});
+            button.addEventListener('mouseup', () => button.classList.remove('active'));
+            button.addEventListener('mouseleave', () => button.classList.remove('active'));
+        });
+
+        // --- Dark Mode ---
+        function setDarkMode(enabled) {
+            if (enabled) {
+                body.classList.add('dark-mode');
+                localStorage.setItem(DARK_MODE_KEY, 'true');
+                if (darkModeToggle) darkModeToggle.checked = true;
+            } else {
+                body.classList.remove('dark-mode');
+                localStorage.setItem(DARK_MODE_KEY, 'false');
+                if (darkModeToggle) darkModeToggle.checked = false;
+            }
+        }
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', function() {
+                setDarkMode(this.checked);
+            });
+        }
+
+
+        if (markdownToggle) {
+            markdownToggle.addEventListener('change', function() {
+                localStorage.setItem(MARKDOWN_ENABLED_KEY, this.checked);
+            });
+        }
+
+        // --- Ollama Settings Management ---
+        function loadOllamaSettings() {
+            if (ollamaEndpointInput) {
+                ollamaEndpointInput.value = localStorage.getItem(OLLAMA_ENDPOINT_KEY) || 'http://localhost:11434/api/generate';
+            }
+            if (ollamaModelInput) {
+                ollamaModelInput.value = localStorage.getItem(OLLAMA_MODEL_KEY) || 'gemma3:4b';
+            }
+            if (ollamaTemperatureInput) {
+                const storedTemp = localStorage.getItem(OLLAMA_TEMPERATURE_KEY);
+                let tempToSet = DEFAULT_OLLAMA_TEMPERATURE;
+                if (storedTemp !== null) {
+                    const parsed = parseFloat(storedTemp);
+                    if (!isNaN(parsed) && parsed >= 0.1 && parsed <= 1.0) {
+                        tempToSet = parsed;
+                    }
+                }
+                ollamaTemperatureInput.value = tempToSet.toFixed(1);
+                localStorage.setItem(OLLAMA_TEMPERATURE_KEY, tempToSet.toFixed(1));
+            }
+        }
+
+        function saveOllamaSetting(key, value) {
+            localStorage.setItem(key, value);
+        }
+
+        if (ollamaEndpointInput) {
+            ollamaEndpointInput.addEventListener('input', () => saveOllamaSetting(OLLAMA_ENDPOINT_KEY, ollamaEndpointInput.value));
+        }
+        if (ollamaModelInput) {
+            ollamaModelInput.addEventListener('input', () => saveOllamaSetting(OLLAMA_MODEL_KEY, ollamaModelInput.value));
+        }
+        if (ollamaTemperatureInput) {
+            ollamaTemperatureInput.addEventListener('input', () => { // Handle comma replacement on input
+                if (ollamaTemperatureInput.value.includes(',')) {
+                    ollamaTemperatureInput.value = ollamaTemperatureInput.value.replace(',', '.');
+                }
+            });
+            ollamaTemperatureInput.addEventListener('change', () => {
+                // The 'input' event should have already replaced comma with dot
+                let tempValue = parseFloat(ollamaTemperatureInput.value);
+                if (isNaN(tempValue) || tempValue < 0.1) tempValue = 0.1;
+                else if (tempValue > 1.0) tempValue = 1.0;
+
+                ollamaTemperatureInput.value = tempValue.toFixed(1); // Ensures display with dot
+                saveOllamaSetting(OLLAMA_TEMPERATURE_KEY, tempValue.toFixed(1));
+            });
+        }
+
+
+        function setOllamaStatusPanelText(key, replacements = {}, typeClass = '') {
+            if(!ollamaStatusText) return;
+            ollamaStatusText.textContent = getTranslation(key, replacements);
+            ollamaStatusText.className = `status-text ${typeClass}`;
+            ollamaStatusText.dataset.key = key;
+            ollamaStatusText.dataset.replacements = JSON.stringify(replacements);
+        }
+
+        async function _performOllamaReachabilityTest() {
+            const endpointUrlFromInput = (ollamaEndpointInput ? ollamaEndpointInput.value.trim() : '') || 'http://localhost:11434/api/generate';
+            let ollamaBaseUrlToTest;
+            try {
+                const parsedUrl = new URL(endpointUrlFromInput);
+                ollamaBaseUrlToTest = parsedUrl.origin;
+            } catch (e) {
+                console.warn("Invalid Ollama endpoint URL:", endpointUrlFromInput, e);
+                return { reachable: false, errorType: 'invalid_url' };
+            }
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(ollamaBaseUrlToTest, { method: 'GET', mode: 'cors', signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const responseText = await response.text();
+                    if (responseText.toLowerCase().includes("ollama is running")) {
+                       return { reachable: true, status: 'running' };
+                    } else {
+                       return { reachable: true, status: 'ok_unexpected_content' };
+                    }
+                } else {
+                    return { reachable: false, errorType: 'http_error', statusCode: response.status };
+                }
+            } catch (error) {
+                console.warn('Ollama reachability test failed:', error);
+                 return { reachable: false, errorType: 'fetch_error', errorName: error.name };
+            }
+        }
+
+        if (checkOllamaStatusBtn && ollamaStatusText) {
+            checkOllamaStatusBtn.addEventListener('click', async () => {
+                if (isCheckingOllama || isTutoringActive) return;
+                isCheckingOllama = true;
+                stopPeriodicOllamaHeaderCheck();
+                setOllamaStatusPanelText('ollamaStatusChecking', {}, 'checking');
+                checkOllamaStatusBtn.disabled = true;
+
+                const result = await _performOllamaReachabilityTest();
+
+                if (result.reachable) {
+                    if (result.status === 'running') {
+                        setOllamaStatusPanelText('ollamaStatusRunning', {}, 'success');
+                    } else {
+                        setOllamaStatusPanelText('ollamaStatusOKUnexpected', {}, 'success');
+                    }
+                } else {
+                    if (result.errorType === 'invalid_url') {
+                        setOllamaStatusPanelText('ollamaStatusInvalidURL', {}, 'error');
+                    } else if (result.errorType === 'http_error') {
+                         setOllamaStatusPanelText('ollamaStatusReachableWithCode', { status: result.statusCode }, 'error');
+                    } else {
+                        setOllamaStatusPanelText('ollamaStatusNotReachable', {}, 'error');
+                    }
+                }
+                isOllamaReachableForHeader = result.reachable;
+                updateAgentHeaderStatus();
+
+                isCheckingOllama = false;
+                checkOllamaStatusBtn.disabled = false;
+                startPeriodicOllamaHeaderCheck();
+                setTimeout(() => {
+                    if (ollamaStatusText.dataset.key && settingsPanel.classList.contains('is-open')) { // Only clear if panel is still open
+                        setOllamaStatusPanelText('', {}, '');
+                    }
+                }, 5000);
+            });
+        }
+
+        async function checkOllamaForHeaderUpdate() {
+            if (isAiResponding || isCheckingOllama || isTutoringActive) return;
+
+            const result = await _performOllamaReachabilityTest();
+            isOllamaReachableForHeader = result.reachable;
+            if (!isAiResponding) {
+                 updateAgentHeaderStatus();
+            }
+        }
+
+        function startPeriodicOllamaHeaderCheck() {
+            if (ollamaHeaderCheckIntervalId) clearInterval(ollamaHeaderCheckIntervalId);
+            ollamaHeaderCheckIntervalId = setInterval(checkOllamaForHeaderUpdate, OLLAMA_CHECK_INTERVAL);
+        }
+
+        function stopPeriodicOllamaHeaderCheck() {
+            if (ollamaHeaderCheckIntervalId) clearInterval(ollamaHeaderCheckIntervalId);
+            ollamaHeaderCheckIntervalId = null;
+        }
+
+        // --- Image Upload Handling ---
+        async function resizeImage(originalDataUri, maxWidth, maxHeight, quality = 0.9, outputFormat = 'image/jpeg') {
+            return new Promise((resolve, reject) => {
+                if (!originalDataUri) {
+                    reject(new Error("Original data URI is null or undefined."));
+                    return;
+                }
+                const img = new Image();
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth || height > maxHeight) {
+                        if (width / maxWidth > height / maxHeight) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        } else {
+                            width = Math.round((width * maxHeight) / height);
+                            height = maxHeight;
+                        }
+                    }
+                    width = Math.max(1, width);
+                    height = Math.max(1, height);
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL(outputFormat, quality));
+                };
+                img.onerror = (err) => {
+                    console.error("Image load error for resizing:", err, originalDataUri ? originalDataUri.substring(0,100) : "undefined URI");
+                    reject(err);
+                };
+                img.src = originalDataUri;
+            });
+        }
+
+        async function generateResizedPreview(originalDataUri) {
+            return resizeImage(originalDataUri, PREVIEW_IMAGE_MAX_DIMENSION_PX, PREVIEW_IMAGE_MAX_DIMENSION_PX, IMAGE_QUALITY_PREVIEW);
+        }
+
+
+        function clearSelectedImageState() {
+            currentOriginalImageBase64DataUri = null;
+            currentResizedPreviewDataUri = null;
+            if(imagePreview) imagePreview.src = '#';
+            if(imagePreviewContainer) imagePreviewContainer.style.display = 'none';
+            if (imageUpload) imageUpload.value = '';
+        }
+
+        if (attachFileBtn && imageUpload && imagePreviewContainer && imagePreview && removeImageBtn) {
+            attachFileBtn.addEventListener('click', () => {
+                if (isTutoringActive) return;
+                imageUpload.click();
+            });
+
+            imageUpload.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        currentOriginalImageBase64DataUri = e.target.result;
+                        imagePreview.src = currentOriginalImageBase64DataUri;
+                        imagePreviewContainer.style.display = 'block';
+                        currentResizedPreviewDataUri = null;
+
+                        try {
+                            currentResizedPreviewDataUri = await generateResizedPreview(currentOriginalImageBase64DataUri);
+                        } catch (error) {
+                            console.error("Error generating resized preview for history:", error);
+                            currentResizedPreviewDataUri = currentOriginalImageBase64DataUri;
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    clearSelectedImageState();
+                }
+            });
+
+            removeImageBtn.addEventListener('click', () => {
+                clearSelectedImageState();
+            });
+        }
+
+        // --- Chat History and Messaging ---
+        function displaySystemMessage(translationKey, replacements = {}) {
+            const text = getTranslation(translationKey, replacements);
+            const systemMessageDiv = document.createElement('div');
+            systemMessageDiv.classList.add('system-message');
+            systemMessageDiv.textContent = text;
+            if(chatMessagesContainer) chatMessagesContainer.appendChild(systemMessageDiv);
+            scrollToBottom();
+        }
+
+        function formatDateForDisplay(timestamp) {
+            const date = new Date(timestamp);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+
+            if (date.toDateString() === today.toDateString()) return getTranslation('dateToday');
+            if (date.toDateString() === yesterday.toDateString()) return getTranslation('dateYesterday');
+
+            return date.toLocaleDateString(currentLanguage, { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function addDateSeparator(timestamp) {
+            const messageDate = new Date(timestamp);
+            const messageDateStr = messageDate.toDateString();
+
+            if (messageDateStr !== lastMessageDateString) {
+                const separatorDiv = document.createElement('div');
+                separatorDiv.classList.add('date-separator');
+                const dateTextNode = document.createTextNode(formatDateForDisplay(timestamp));
+                separatorDiv.appendChild(dateTextNode);
+
+                if(chatMessagesContainer) chatMessagesContainer.appendChild(separatorDiv);
+                lastMessageDateString = messageDateStr;
+            }
+        }
+
+        function formatAiMessageContent(text) {
+            const useMarkdown = markdownToggle ? markdownToggle.checked : true;
+            if (useMarkdown && typeof marked !== 'undefined') {
+                return marked.parse(text, { breaks: true, gfm: true });
+            } else {
+                const tempDiv = document.createElement('div');
+                tempDiv.textContent = text;
+                return tempDiv.innerHTML.replace(/\n/g, '<br>');
+            }
+        }
+
+        function renderMessageToDOM(messageData, isStreamingPlaceholder = false) {
+            addDateSeparator(messageData.timestamp);
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', messageData.type);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content');
+
+            let displayText = messageData.text || "";
+
+            if (messageData.type === 'ai' || messageData.type === 'tutor') {
+                contentDiv.innerHTML = formatAiMessageContent(displayText.trim());
+            } else if (messageData.type === 'user') {
+                if (messageData.imageBase64) {
+                    const imgPreviewElement = document.createElement('img');
+                    imgPreviewElement.src = messageData.imageBase64;
+                    imgPreviewElement.alt = getTranslation('userImagePreviewAlt');
+                    imgPreviewElement.classList.add('message-image-preview');
+                    contentDiv.appendChild(imgPreviewElement);
+                } else if (messageData.hasImage) {
+                    const svgIconNS = "http://www.w3.org/2000/svg";
+                    const svgIcon = document.createElementNS(svgIconNS, "svg");
+                    svgIcon.setAttribute("viewBox", "0 0 24 24");
+                    svgIcon.classList.add('message-image-fallback-icon');
+                    const path = document.createElementNS(svgIconNS, "path");
+                    path.setAttribute("d", "M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z");
+                    svgIcon.appendChild(path);
+                    contentDiv.appendChild(svgIcon);
+                }
+
+                if (displayText.trim()) {
+                    const textNode = document.createTextNode(displayText);
+                    contentDiv.appendChild(textNode);
+                }
+            } else {
+                contentDiv.textContent = displayText;
+            }
+            messageDiv.appendChild(contentDiv);
+
+            const timeDiv = document.createElement('div');
+            timeDiv.classList.add('message-time');
+            if (!isStreamingPlaceholder) {
+                timeDiv.textContent = new Date(messageData.timestamp).toLocaleTimeString(currentLanguage, { hour: 'numeric', minute: '2-digit' });
+            }
+            messageDiv.appendChild(timeDiv);
+
+            if(chatMessagesContainer) chatMessagesContainer.appendChild(messageDiv);
+            return messageDiv;
+        }
+
+        function saveMessageToHistory(messageData) {
+            const historyJson = localStorage.getItem(CHAT_HISTORY_KEY);
+            const history = historyJson ? JSON.parse(historyJson) : [];
+            history.push(messageData);
+            try {
+                localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history));
+            } catch (e) {
+                console.error("Error saving history to localStorage (likely full):", e);
+                displaySystemMessage("Error saving history: Storage might be full.");
+            }
+        }
+
+        function addNewMessage(text, type, hasImage = false, imageBase64ForHistory = null) {
+            if (type !== 'ai' && type !== 'tutor' && (!text || (typeof text === 'string' && !text.trim())) && !hasImage ) {
+                 return null;
+            }
+
+            const messageData = {
+                text: text,
+                type: type,
+                hasImage: hasImage,
+                imageBase64: imageBase64ForHistory,
+                timestamp: Date.now()
+            };
+
+            const isPlaceholder = (type === 'ai' && !text && (streamResponsesToggle ? streamResponsesToggle.checked : true));
+
+            const messageElement = renderMessageToDOM(messageData, isPlaceholder);
+
+            if (type === 'user' || type === 'tutor' || (type === 'ai' && !isPlaceholder)) {
+                saveMessageToHistory(messageData);
+            }
+
+            scrollToBottom();
+            return messageElement;
+        }
+
+        async function loadChatHistory() {
+            if (!chatMessagesContainer) return;
+            chatMessagesContainer.innerHTML = '';
+            lastMessageDateString = '';
+
+            let historyActuallyLoaded = false;
+            let systemMessageAlreadyShownAboutLoading = false;
+
+            try {
+                const response = await fetch('chat_history.json', { cache: "no-store" });
+                if (response.ok) {
+                    const historyFromFile = await response.json();
+                    if (Array.isArray(historyFromFile) && historyFromFile.length > 0) {
+                        historyFromFile.forEach(msgData => {
+                            msgData.hasImage = msgData.hasImage || false;
+                            msgData.imageBase64 = msgData.imageBase64 || null;
+                            renderMessageToDOM(msgData);
+                        });
+                        historyActuallyLoaded = true;
+                        localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(historyFromFile));
+                        displaySystemMessage("systemMsgLoadedFromFile");
+                        systemMessageAlreadyShownAboutLoading = true;
+                    } else if (Array.isArray(historyFromFile) && historyFromFile.length === 0) {
+                        console.info("chat_history.json is empty. Will try localStorage.");
+                    } else {
+                        console.warn("chat_history.json is not a valid history array. Will try localStorage.");
+                    }
+                } else if (response.status !== 404) {
+                    console.warn(`Error loading chat_history.json (status: ${response.status}). Will try localStorage.`);
+                }
+            } catch (error) {
+                console.info("Could not load chat_history.json (likely not present). Will try localStorage:", error.message);
+            }
+
+            if (!historyActuallyLoaded) {
+                const historyFromStorageJson = localStorage.getItem(CHAT_HISTORY_KEY);
+                if (historyFromStorageJson) {
+                    try {
+                        const historyFromStorage = JSON.parse(historyFromStorageJson);
+                        if (Array.isArray(historyFromStorage) && historyFromStorage.length > 0) {
+                            historyFromStorage.forEach(msgData => {
+                                msgData.hasImage = msgData.hasImage || false;
+                                msgData.imageBase64 = msgData.imageBase64 || null;
+                                renderMessageToDOM(msgData)
+                            });
+                            historyActuallyLoaded = true;
+                            if (!systemMessageAlreadyShownAboutLoading) {
+                                displaySystemMessage("systemMsgLoadedFromStorage");
+                                systemMessageAlreadyShownAboutLoading = true;
+                            }
+                        } else {
+                             console.info("Browser's local storage for chat history is empty or invalid array.");
+                        }
+                    } catch (e) {
+                        console.error("Error parsing history from local storage. Clearing it.", e);
+                        localStorage.removeItem(CHAT_HISTORY_KEY);
+                    }
+                }
+            }
+
+            if (!historyActuallyLoaded && !systemMessageAlreadyShownAboutLoading) {
+                 displaySystemMessage("systemMsgNoHistory");
+            }
+
+            scrollToBottom();
+        }
+
+        if (clearChatHistoryBtn) {
+            clearChatHistoryBtn.addEventListener('click', () => {
+                if (isTutoringActive) {
+                    alert("Please exit tutoring mode before clearing chat history.");
+                    return;
+                }
+                if (confirm(getTranslation('confirmClearHistory'))) {
+                    localStorage.removeItem(CHAT_HISTORY_KEY);
+                    if(chatMessagesContainer) chatMessagesContainer.innerHTML = '';
+                    lastMessageDateString = '';
+                    displaySystemMessage("systemMsgHistoryCleared");
+                    if (settingsPanel && settingsPanel.classList.contains('is-open')) {
+                        settingsPanel.classList.remove('is-open');
+                    }
+                }
+            });
+        }
+
+        // --- Ollama Integration (General Chat) ---
+        function getChatHistoryForPrompt() {
+            const historyJson = localStorage.getItem(CHAT_HISTORY_KEY);
+            const history = historyJson ? JSON.parse(historyJson) : [];
+
+            const recentMessages = history
+                .filter(msg => msg.type === 'user' || msg.type === 'ai' || msg.type === 'tutor')
+                .slice(-MAX_HISTORY_FOR_PROMPT);
+
+            const userLabel = getTranslation('ollamaPromptUserLabel');
+            const aiLabel = getTranslation('ollamaPromptAiLabel');
+
+            return recentMessages.map(msg => {
+                const prefix = msg.type === 'user' ? userLabel : aiLabel;
+                let messageContent = msg.text || "";
+                if (msg.type === 'user' && msg.hasImage && !msg.text.trim()) {
+                    messageContent = `[${getTranslation('userImagePreviewAlt')}]`;
+                }
+                return `${prefix}: ${messageContent}`;
+            }).join('\n');
+        }
+
+        function constructOllamaPrompt(userInput, chatHistoryString, currentMessageHasImage) {
+            const systemPrompt = getTranslation('ollamaPromptSystem');
+            const userLabel = getTranslation('ollamaPromptUserLabel');
+            const aiLabel = getTranslation('ollamaPromptAiLabel');
+
+            let fullPrompt = `${systemPrompt}\n\n`;
+            if (chatHistoryString) {
+                fullPrompt += `Previous conversation:\n${chatHistoryString}\n\n`;
+            }
+
+            let currentUserInputLine = `${userLabel}: `;
+            if (currentMessageHasImage) {
+                currentUserInputLine += `[Image Provided] `;
+            }
+            currentUserInputLine += (userInput || "");
+
+            fullPrompt += `${currentUserInputLine}\n${aiLabel}:`;
+            return fullPrompt;
+        }
+
+        async function callOllamaApi(promptText, onTokenCallback, imageBase64Payload = null) {
+            const endpoint = (ollamaEndpointInput ? ollamaEndpointInput.value : null) || 'http://localhost:11434/api/generate';
+            const model = (ollamaModelInput ? ollamaModelInput.value : null) || 'gemma3:4b';
+            const stream = streamResponsesToggle ? streamResponsesToggle.checked : true;
+
+            let temperatureValue = DEFAULT_OLLAMA_TEMPERATURE;
+            if (ollamaTemperatureInput) {
+                const parsedTemp = parseFloat(ollamaTemperatureInput.value); // Value is already dot-separated
+                if (!isNaN(parsedTemp) && parsedTemp >= 0.1 && parsedTemp <= 1.0) {
+                    temperatureValue = parsedTemp;
+                }
+            }
+
+            const requestPayload = {
+                model: model,
+                prompt: promptText,
+                stream: stream,
+                options: {
+                    temperature: temperatureValue
+                }
+            };
+
+            if (imageBase64Payload) {
+                requestPayload.images = [imageBase64Payload];
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestPayload),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: "Unknown error structure" }));
+                    throw new Error(`Ollama API Error: ${response.status} - ${errorData.error || response.statusText}`);
+                }
+
+                if (stream && response.body) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split('\n').filter(line => line.trim() !== '');
+                        for (const line of lines) {
+                            try {
+                                const jsonResponse = JSON.parse(line);
+                                if (jsonResponse.response) {
+                                    onTokenCallback(jsonResponse.response);
+                                }
+                                if (jsonResponse.done) {
+                                    return;
+                                }
+                            } catch (e) {
+                                console.warn("Error parsing streamed JSON line:", line, e);
+                            }
+                        }
+                    }
+                    return;
+                } else {
+                    const data = await response.json();
+                    return data.response;
+                }
+            } catch (error) {
+                console.error("Error calling Ollama API:", error);
+                isOllamaReachableForHeader = false;
+                updateAgentHeaderStatus();
+                throw error;
+            }
+        }
+
+        function createVisualAiMessage() {
+            const timestamp = Date.now();
+            addDateSeparator(timestamp);
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'ai');
+
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content');
+            contentDiv.innerHTML = '';
+            messageDiv.appendChild(contentDiv);
+
+            const timeDiv = document.createElement('div');
+            timeDiv.classList.add('message-time');
+            messageDiv.appendChild(timeDiv);
+
+            if(chatMessagesContainer) chatMessagesContainer.appendChild(messageDiv);
+            scrollToBottom();
+            return messageDiv;
+        }
+
+        // --- TUTORING FEATURE IMPLEMENTATION ---
+
+        function getDefaultUserState() {
+            return {
+                version: "1.1", // Keep version consistent
+                user_preferences: {
+                    default_input_lang: null,
+                    default_output_lang: KNOWN_LANG,
+                    last_learn_lang: null,
+                    last_input_lang: null,
+                    last_output_lang: null,
+                },
+                language_proficiency: {},
+                learning_focus: {},
+                lesson_history_summary: [],
+                current_lesson_data: {
+                    input_lang: null,
+                    output_lang: null,
+                    interactions: []
+                }
+            };
+        }
+
+        function loadUserState() {
+            const storedState = localStorage.getItem(USER_STATE_KEY);
+            if (storedState) {
+                try {
+                    user_state = JSON.parse(storedState);
+                    if (!user_state.version || user_state.version !== "1.1") {
+                        console.warn("User state version mismatch or missing. Resetting to default.");
+                        user_state = getDefaultUserState();
+                        saveUserState();
+                    }
+                    if (user_state.current_lesson_data && user_state.current_lesson_data.input_lang) {
+                        console.log("Found incomplete lesson data from previous session. Clearing it.");
+                        user_state.current_lesson_data = { input_lang: null, output_lang: null, interactions: [] };
+                        saveUserState();
+                    }
+
+                } catch (e) {
+                    console.error("Error parsing user_state from localStorage. Resetting to default.", e);
+                    user_state = getDefaultUserState();
+                    saveUserState();
+                }
+            } else {
+                user_state = getDefaultUserState();
+            }
+            updateStudyButtonText();
+        }
+
+        function saveUserState() {
+            if (user_state) {
+                try {
+                    if (!isTutoringActive && user_state.current_lesson_data && !user_state.current_lesson_data.input_lang) {
+                         user_state.current_lesson_data = { input_lang: null, output_lang: null, interactions: [] };
+                    } else if (isTutoringActive && user_state.current_lesson_data) {
+                        // Current lesson data is actively being managed
+                    }
+                    localStorage.setItem(USER_STATE_KEY, JSON.stringify(user_state));
+                } catch (e) {
+                    console.error("Error saving user_state to localStorage:", e);
+                }
+            }
+        }
+
+        function updateStudyButtonText() {
+            let buttonTextKey = 'studySessionBtn';
+            let replacements = {};
+            if (isTutoringActive && currentLessonConfig.learn_lang) {
+                 buttonTextKey = 'studySessionBtnContinue';
+                 replacements = { learn_lang: currentLessonConfig.learn_lang };
+            } else if (user_state && user_state.user_preferences && user_state.user_preferences.last_learn_lang) {
+                buttonTextKey = 'studySessionBtnContinue';
+                replacements = { learn_lang: user_state.user_preferences.last_learn_lang };
+            }
+
+            const text = getTranslation(buttonTextKey, replacements);
+            if (startStudyBtnMain) startStudyBtnMain.title = text;
+        }
+
+
+        function disableChatInputForTutor(placeholderKey = 'tutorChatInputPlaceholder', replacements = {}) {
+            if (chatInput) {
+                chatInput.disabled = true;
+                chatInput.placeholder = getTranslation(placeholderKey, replacements);
+            }
+            if (sendButton) sendButton.disabled = true;
+            if (attachFileBtn) attachFileBtn.disabled = true;
+        }
+        function enableChatInputAfterTutor(isStillTutoring = false) {
+            if (chatInput) {
+                chatInput.disabled = false;
+                if (isStillTutoring) {
+                    // Placeholder might be set by specific tutor step, or default tutor placeholder
+                    if (!chatInput.placeholder.startsWith(getTranslation('tutorChatInputTranslationPlaceholder', {output_lang: ''}).substring(0,10))) {
+                         chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
+                    }
+                } else {
+                    chatInput.placeholder = getTranslation('chatInputPlaceholder');
+                }
+            }
+            if (sendButton) sendButton.disabled = false;
+            if (attachFileBtn) attachFileBtn.disabled = false;
+        }
+
+        function displayTutorMessage(textOrKey, type = 'tutor', replacements = {}) {
+            const messageText = translations[currentLanguage]?.[textOrKey] ? getTranslation(textOrKey, replacements) : textOrKey;
+            addNewMessage(messageText, type);
+        }
+
+        async function callTutorOllamaApi(promptBlueprintObject) {
+            const endpoint = (ollamaEndpointInput ? ollamaEndpointInput.value : null) || 'http://localhost:11434/api/generate';
+            const model = (ollamaModelInput ? ollamaModelInput.value : null) || 'gemma3:4b';
+
+            const ollamaSystemPrompt = `You are an AI language tutor state machine. You will receive a JSON object describing the current context and user input. Your task is to analyze this input and return a JSON object in the specified 'desired_output_format'. Do NOT add any explanatory text outside the JSON response.`;
+
+            const ollamaUserPrompt = `Current task and state:\n\`\`\`json\n${JSON.stringify(promptBlueprintObject, null, 2)}\n\`\`\`\nPlease provide your response strictly in the 'desired_output_format' JSON structure.`;
+
+            const requestPayload = {
+                model: model,
+                prompt: ollamaUserPrompt,
+                system: ollamaSystemPrompt,
+                stream: false,
+                format: "json",
+                options: {
+                    temperature: 0.5
+                }
+            };
+
+            isTutorResponding = true;
+            disableChatInputForTutor();
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestPayload),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Tutor Ollama API Error: ${response.status} - ${errorText}`);
+                }
+                const data = await response.json();
+
+                let jsonData;
+                if (typeof data.response === 'string') {
+                    try {
+                        jsonData = JSON.parse(data.response);
+                    } catch (e) {
+                         console.error("Failed to parse JSON from Ollama tutor response string:", data.response, e);
+                         throw new Error("Tutor model did not return valid JSON in response string.");
+                    }
+                } else if (typeof data.response === 'object') {
+                    jsonData = data.response;
+                } else if (data.message && data.message.content && typeof data.message.content === 'string') {
+                     try {
+                        jsonData = JSON.parse(data.message.content);
+                    } catch (e) {
+                         console.error("Failed to parse JSON from Ollama tutor response (data.message.content):", data.message.content, e);
+                         throw new Error("Tutor model did not return valid JSON in data.message.content.");
+                    }
+                }
+                else {
+                    console.error("Unexpected Ollama tutor response format:", data);
+                    throw new Error("Tutor model returned an unexpected response format.");
+                }
+                return jsonData;
+
+            } catch (error) {
+                console.error("Error calling Tutor Ollama API:", error);
+                displayTutorMessage('tutorErrorGeneral');
+                throw error;
+            } finally {
+                isTutorResponding = false;
+            }
+        }
+
+        async function handleInitialTutorInteraction(userInputText) {
+            expectedTutorResponseHandler = null;
+            let promptBlueprint;
+
+            const lastLearnLang = user_state.user_preferences.last_learn_lang;
+            const lastInputLang = user_state.user_preferences.last_input_lang;
+            const lastOutputLang = user_state.user_preferences.last_output_lang;
+
+            promptBlueprint = {
+                system_instruction: "You are an AI assistant helping a user start a language lesson. The user was reminded of their previous session: learning '{last_learn_lang}', translating from '{last_input_lang}' to '{last_output_lang}'. Their known/primary language is '{known_lang}'. Analyze their response to understand their intention for the current session. They might want to continue, switch languages, change translation directions, or specify a completely new setup. Pay attention if they mention specific languages or translation directions.",
+                user_previous_session_context: {
+                    last_learn_lang: lastLearnLang,
+                    last_input_lang: lastInputLang,
+                    last_output_lang: lastOutputLang
+                },
+                user_current_response: userInputText,
+                known_lang: KNOWN_LANG,
+                current_user_state_summary: {
+                    language_proficiency: user_state.language_proficiency
+                },
+                desired_output_format: {
+                    description: "Return a JSON object indicating the user's intention and any specified languages. 'intention' can be 'continue_previous', 'new_lesson_specified', 'choose_new_language', 'choose_new_direction', 'unclear'. If 'new_lesson_specified', fill in 'learn_lang', 'input_lang', 'output_lang'. If only language is new, fill 'learn_lang'. If only direction is new, set 'intention' to 'choose_new_direction' and 'learn_lang' to last_learn_lang.",
+                    example: { intention: "continue_previous", learn_lang: "spanish", input_lang: "spanish", output_lang: "english" }
+                }
+            };
+
+            promptBlueprint.system_instruction = promptBlueprint.system_instruction
+                .replace('{last_learn_lang}', lastLearnLang || 'N/A')
+                .replace('{last_input_lang}', lastInputLang || 'N/A')
+                .replace('{last_output_lang}', lastOutputLang || 'N/A')
+                .replace('{known_lang}', KNOWN_LANG);
+
+            try {
+                const llmResponse = await callTutorOllamaApi(promptBlueprint);
+                if (llmResponse && llmResponse.intention) {
+                    if (llmResponse.intention === 'continue_previous' && lastLearnLang && lastInputLang && lastOutputLang) {
+                        currentLessonConfig.learn_lang = lastLearnLang;
+                        currentLessonConfig.input_lang = lastInputLang;
+                        currentLessonConfig.output_lang = lastOutputLang;
+                        await prepareLessonCore();
+                    } else if (llmResponse.intention === 'new_lesson_specified' && llmResponse.learn_lang && llmResponse.input_lang && llmResponse.output_lang) {
+                        currentLessonConfig.learn_lang = llmResponse.learn_lang.toLowerCase();
+                        currentLessonConfig.input_lang = llmResponse.input_lang.toLowerCase();
+                        currentLessonConfig.output_lang = llmResponse.output_lang.toLowerCase();
+                        await prepareLessonCore();
+                    } else {
+                        displayTutorMessage('tutorAskLanguageDirection');
+                        expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
+                        enableChatInputAfterTutor(true);
+                        chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
+                    }
+                } else {
+                    throw new Error("Invalid LLM response structure for initial interaction.");
+                }
+            } catch (error) {
+                displayTutorMessage('tutorErrorOllamaResponse');
+                exitTutoringMode();
+            }
+        }
+
+        async function handleGeneralLanguageDirectionSetup(userInputText) {
+            expectedTutorResponseHandler = null;
+            const promptBlueprint = {
+                system_instruction: "You are an AI assistant helping a user set up a language lesson. Their known/primary language is '{known_lang}'. Analyze their response to identify: 1. The language they want to learn/practice ('learn_lang'). 2. The source language for translation ('input_lang'). 3. The target language for translation ('output_lang'). One of input/output should be 'learn_lang'. The other is often '{known_lang}' unless specified otherwise.",
+                user_current_response: userInputText,
+                known_lang: KNOWN_LANG,
+                current_user_state_summary: {
+                    language_proficiency: user_state.language_proficiency,
+                    user_preferences: user_state.user_preferences
+                },
+                desired_output_format: {
+                    description: "Return a JSON object with 'learn_lang', 'input_lang', and 'output_lang'. Ensure language names are lowercase English (e.g., 'spanish'). If any part is unclear, set the respective field(s) to null.",
+                    example: { learn_lang: "spanish", input_lang: "english", output_lang: "spanish" }
+                }
+            };
+            promptBlueprint.system_instruction = promptBlueprint.system_instruction.replace('{known_lang}', KNOWN_LANG);
+
+            try {
+                const llmResponse = await callTutorOllamaApi(promptBlueprint);
+                if (llmResponse && llmResponse.learn_lang && llmResponse.input_lang && llmResponse.output_lang) {
+                    currentLessonConfig.learn_lang = llmResponse.learn_lang.toLowerCase();
+                    currentLessonConfig.input_lang = llmResponse.input_lang.toLowerCase();
+                    currentLessonConfig.output_lang = llmResponse.output_lang.toLowerCase();
+
+                    const langs = [currentLessonConfig.input_lang, currentLessonConfig.output_lang];
+                    if (!langs.includes(currentLessonConfig.learn_lang)) {
+                         throw new Error("Learn language not in input/output pair.");
+                    }
+                    if (currentLessonConfig.input_lang === currentLessonConfig.output_lang) {
+                        throw new Error("Input and output languages cannot be the same.");
+                    }
+
+                    await prepareLessonCore();
+                } else if (llmResponse && llmResponse.learn_lang && (!llmResponse.input_lang || !llmResponse.output_lang)) {
+                    currentLessonConfig.learn_lang = llmResponse.learn_lang.toLowerCase();
+                    displayTutorMessage('tutorAskDirectionClarification', 'tutor', { learn_lang: currentLessonConfig.learn_lang, known_lang: KNOWN_LANG });
+                    expectedTutorResponseHandler = handleDirectionClarification;
+                    enableChatInputAfterTutor(true);
+                    chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
+                }
+                else {
+                    displayTutorMessage('tutorUnclearIntent');
+                    expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
+                    enableChatInputAfterTutor(true);
+                    chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
+                }
+            } catch (error) {
+                console.error("Error in language/direction setup:", error);
+                displayTutorMessage('tutorErrorOllamaResponse');
+                displayTutorMessage('tutorAskLanguageDirection');
+                expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
+                enableChatInputAfterTutor(true);
+                chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
+            }
+        }
+
+        async function handleDirectionClarification(userInputText) {
+             expectedTutorResponseHandler = null;
+             const promptBlueprint = {
+                system_instruction: "The user wants to learn '{learn_lang}'. Their known language is '{known_lang}'. We asked if they want to translate FROM '{learn_lang}' TO '{known_lang}' (for understanding) or FROM '{known_lang}' TO '{learn_lang}' (for production). Analyze their response to determine 'input_lang' and 'output_lang'.",
+                learn_lang_context: currentLessonConfig.learn_lang,
+                known_lang_context: KNOWN_LANG,
+                user_current_response: userInputText,
+                desired_output_format: {
+                    description: "Return a JSON object with 'input_lang' and 'output_lang'. Values should be '{learn_lang}' or '{known_lang}'. If unclear, set to null.",
+                    example: { input_lang: "english", output_lang: "spanish" }
+                }
+            };
+            promptBlueprint.system_instruction = promptBlueprint.system_instruction
+                .replace(/{learn_lang}/g, currentLessonConfig.learn_lang)
+                .replace(/{known_lang}/g, KNOWN_LANG);
+
+            try {
+                const llmResponse = await callTutorOllamaApi(promptBlueprint);
+                if (llmResponse && llmResponse.input_lang && llmResponse.output_lang) {
+                    currentLessonConfig.input_lang = llmResponse.input_lang.toLowerCase();
+                    currentLessonConfig.output_lang = llmResponse.output_lang.toLowerCase();
+                    if (currentLessonConfig.input_lang === currentLessonConfig.output_lang) {
+                        throw new Error("Input and output cannot be same after clarification.");
+                    }
+                    const langs = [currentLessonConfig.input_lang, currentLessonConfig.output_lang];
+                    if (!langs.includes(currentLessonConfig.learn_lang) || !langs.includes(KNOWN_LANG)) {
+                        if (!( (currentLessonConfig.input_lang === currentLessonConfig.learn_lang && currentLessonConfig.output_lang === KNOWN_LANG) ||
+                               (currentLessonConfig.input_lang === KNOWN_LANG && currentLessonConfig.output_lang === currentLessonConfig.learn_lang) )) {
+                            throw new Error("Invalid language pair after clarification.");
+                        }
+                    }
+                    await prepareLessonCore();
+                } else {
+                    displayTutorMessage('tutorUnclearIntent');
+                    displayTutorMessage('tutorAskDirectionClarification', 'tutor', { learn_lang: currentLessonConfig.learn_lang, known_lang: KNOWN_LANG });
+                    expectedTutorResponseHandler = handleDirectionClarification;
+                    enableChatInputAfterTutor(true);
+                    chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
+                }
+            } catch (error) {
+                 console.error("Error in direction clarification:", error);
+                displayTutorMessage('tutorErrorOllamaResponse');
+                displayTutorMessage('tutorAskLanguageDirection');
+                expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
+                enableChatInputAfterTutor(true);
+                chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
+            }
+        }
+
+
+        async function prepareLessonCore() {
+            user_state.user_preferences.last_learn_lang = currentLessonConfig.learn_lang;
+            user_state.user_preferences.last_input_lang = currentLessonConfig.input_lang;
+            user_state.user_preferences.last_output_lang = currentLessonConfig.output_lang;
+            if (!user_state.language_proficiency[currentLessonConfig.learn_lang]) {
+                user_state.language_proficiency[currentLessonConfig.learn_lang] = {
+                    level: 0.1, last_practiced_utc: null, strengths: [], weaknesses: [],
+                    correct_streak_session: 0, overall_accuracy_estimate: 0
+                };
+            }
+            if (!user_state.learning_focus[currentLessonConfig.learn_lang]) {
+                user_state.learning_focus[currentLessonConfig.learn_lang] = [];
+            }
+
+            user_state.current_lesson_data = {
+                input_lang: currentLessonConfig.input_lang,
+                output_lang: currentLessonConfig.output_lang,
+                interactions: []
+            };
+            lesson_interactions = [];
+            saveUserState();
+            updateStudyButtonText();
+
+            displayTutorMessage('tutorReadyToStartLesson', 'tutor', {
+                learn_lang: currentLessonConfig.learn_lang,
+                input_lang: currentLessonConfig.input_lang,
+                output_lang: currentLessonConfig.output_lang
+            });
+
+            const promptBlueprint = {
+                system_instruction: "You are a helpful and encouraging language teaching AI. The student wants to translate 5 sentences from '{input_lang}' to '{output_lang}'. Their primary goal is to improve their '{learn_lang}'. Based on their current learning state for '{learn_lang}', provide 5 sentences in '{input_lang}'. The sentences should be suitable for their proficiency in '{learn_lang}' when translated.",
+                student_learning_state: user_state,
+                lesson_config: currentLessonConfig,
+                desired_output_format: {
+                    description: "Return a JSON object with a single key 'sentences', which is an array of 5 strings in '{input_lang}'.",
+                    example: {"sentences": ["sentence1", "sentence2", "sentence3", "sentence4", "sentence5"]}
+                }
+            };
+            promptBlueprint.system_instruction = promptBlueprint.system_instruction
+                .replace(/{input_lang}/g, currentLessonConfig.input_lang)
+                .replace(/{output_lang}/g, currentLessonConfig.output_lang)
+                .replace(/{learn_lang}/g, currentLessonConfig.learn_lang);
+            promptBlueprint.desired_output_format.description = promptBlueprint.desired_output_format.description
+                .replace('{input_lang}', currentLessonConfig.input_lang);
+
+
+            try {
+                const llmResponse = await callTutorOllamaApi(promptBlueprint);
+                if (llmResponse && llmResponse.sentences && Array.isArray(llmResponse.sentences) && llmResponse.sentences.length === 5) {
+                    lesson_sentences = llmResponse.sentences;
+                    current_sentence_index = 0;
+                    startTranslationExerciseCycle();
+                } else {
+                    displayTutorMessage('tutorErrorNoSentences');
+                    exitTutoringMode();
+                }
+            } catch (error) {
+                displayTutorMessage('tutorErrorOllamaResponse');
+                exitTutoringMode();
+            }
+        }
+
+        function startTranslationExerciseCycle() {
+            if (current_sentence_index < lesson_sentences.length) {
+                const currentSentence = lesson_sentences[current_sentence_index];
+                displayTutorMessage(`${getTranslation('tutorTranslateThis', { output_lang: currentLessonConfig.output_lang })}\n\n"${currentSentence}"`, 'tutor');
+                expectedTutorResponseHandler = processUserTranslation;
+                enableChatInputAfterTutor(true);
+                chatInput.placeholder = getTranslation('tutorChatInputTranslationPlaceholder', {output_lang: currentLessonConfig.output_lang});
+                chatInput.focus();
+            } else {
+                concludeLesson();
+            }
+        }
+
+        async function processUserTranslation(userTranslationText) {
+            expectedTutorResponseHandler = null;
+            const originalSentence = lesson_sentences[current_sentence_index];
+
+            const promptBlueprint = {
+                system_instruction: "You are a helpful and encouraging language teaching AI. The student is learning '{learn_lang}'. They translated a sentence from '{input_lang}' to '{output_lang}'. Evaluate their translation, provide corrections and advice, and update their entire learning state.",
+                exercise_details: {
+                    learn_lang: currentLessonConfig.learn_lang,
+                    input_lang: currentLessonConfig.input_lang,
+                    original_sentence: originalSentence,
+                    output_lang: currentLessonConfig.output_lang,
+                    user_translation: userTranslationText
+                },
+                student_learning_state_before_this_interaction: user_state,
+                desired_output_format: {
+                    description: "Return a JSON object with 'your_corrections' (string), 'your_advice' (string), and 'updated_user_state' (the *complete, modified* user_state JSON object reflecting changes based on this interaction, especially for '{learn_lang}' proficiency metrics like level, strengths, weaknesses, last_practiced_utc, accuracy, streak). Accuracy should be a decimal value between 0 and 1 (e.g., 0.75 for 75%).",
+                    example: { your_corrections: "...", your_advice: "...", updated_user_state: { /* complete user_state object with overall_accuracy_estimate as decimal */ } }
+                }
+            };
+             promptBlueprint.system_instruction = promptBlueprint.system_instruction
+                .replace(/{learn_lang}/g, currentLessonConfig.learn_lang)
+                .replace(/{input_lang}/g, currentLessonConfig.input_lang)
+                .replace(/{output_lang}/g, currentLessonConfig.output_lang);
+             promptBlueprint.desired_output_format.description = promptBlueprint.desired_output_format.description
+                .replace('{learn_lang}', currentLessonConfig.learn_lang);
+
+
+            try {
+                const llmResponse = await callTutorOllamaApi(promptBlueprint);
+                if (llmResponse && llmResponse.your_corrections && llmResponse.your_advice && llmResponse.updated_user_state) {
+                    displayTutorMessage(`**Correction:**\n${llmResponse.your_corrections}\n\n**Advice:**\n${llmResponse.your_advice}`, 'tutor');
+
+                    user_state = llmResponse.updated_user_state;
+                    if (!user_state.current_lesson_data || !user_state.current_lesson_data.input_lang) {
+                        user_state.current_lesson_data = {
+                            input_lang: currentLessonConfig.input_lang,
+                            output_lang: currentLessonConfig.output_lang,
+                            interactions: lesson_interactions
+                        };
+                    }
+
+
+                    const interactionData = {
+                        original_sentence: originalSentence,
+                        user_translation: userTranslationText,
+                        ai_correction: llmResponse.your_corrections,
+                        ai_advice: llmResponse.your_advice
+                    };
+                    lesson_interactions.push(interactionData);
+                    if(user_state.current_lesson_data && user_state.current_lesson_data.interactions) {
+                        user_state.current_lesson_data.interactions.push(interactionData);
+                    } else {
+                        user_state.current_lesson_data = { interactions: [interactionData], ...currentLessonConfig };
+                    }
+
+
+                    saveUserState();
+
+                    current_sentence_index++;
+                    startTranslationExerciseCycle();
+                } else {
+                    throw new Error("Invalid LLM response structure for feedback.");
+                }
+            } catch (error) {
+                displayTutorMessage('tutorErrorOllamaResponse');
+                current_sentence_index++;
+                startTranslationExerciseCycle();
+            }
+        }
+
+        async function concludeLesson() {
+            displayTutorMessage("Processing lesson summary...", 'tutor');
+
+            if (user_state.current_lesson_data) {
+                 user_state.current_lesson_data.interactions = lesson_interactions;
+            }
+
+            const promptBlueprint = {
+                system_instruction: "You are a helpful and encouraging language teaching AI. The student has completed a lesson translating 5 sentences from '{input_lang}' to '{output_lang}', focusing on improving their '{learn_lang}'. Summarize their performance, offer motivation, and suggest a next focus.",
+                lesson_context: {
+                    learn_lang: currentLessonConfig.learn_lang,
+                    input_lang: currentLessonConfig.input_lang,
+                    output_lang: currentLessonConfig.output_lang
+                },
+                student_learning_state_after_lesson: user_state,
+                desired_output_format: {
+                    description: "Return a JSON object with 'lesson_summary_text' (string, overall summary of the lesson), 'motivational_message' (string), and 'next_focus_suggestion' (string, optional, for '{learn_lang}').",
+                    example: { lesson_summary_text: "You did well on X, but could improve Y.", motivational_message: "Keep practicing!", next_focus_suggestion: "verb conjugations" }
+                }
+            };
+            promptBlueprint.system_instruction = promptBlueprint.system_instruction
+                .replace(/{input_lang}/g, currentLessonConfig.input_lang || "the input language")
+                .replace(/{output_lang}/g, currentLessonConfig.output_lang || "the output language")
+                .replace(/{learn_lang}/g, currentLessonConfig.learn_lang || "the language being learned");
+            promptBlueprint.desired_output_format.description = promptBlueprint.desired_output_format.description
+                .replace('{learn_lang}', currentLessonConfig.learn_lang || "the language being learned");
+
+
+            try {
+                const llmResponse = await callTutorOllamaApi(promptBlueprint);
+                if (llmResponse && llmResponse.motivational_message) { // motivational_message is a good indicator of a valid response
+                    const summaryText = (typeof llmResponse.lesson_summary_text === 'string' && llmResponse.lesson_summary_text.trim() !== "")
+                                        ? llmResponse.lesson_summary_text
+                                        : "Well done on completing the exercises!";
+
+                    displayTutorMessage(`**Lesson Summary:**\n${summaryText}\n\n**Motivation:**\n${llmResponse.motivational_message}`, 'tutor');
+
+                    if (llmResponse.next_focus_suggestion && currentLessonConfig.learn_lang) {
+                        displayTutorMessage(`**Next Focus Suggestion for ${currentLessonConfig.learn_lang}:** ${llmResponse.next_focus_suggestion}`, 'tutor');
+                        if (user_state.learning_focus && user_state.learning_focus[currentLessonConfig.learn_lang] &&
+                            !user_state.learning_focus[currentLessonConfig.learn_lang].includes(llmResponse.next_focus_suggestion)) {
+                            user_state.learning_focus[currentLessonConfig.learn_lang].push(llmResponse.next_focus_suggestion);
+                        }
+                    }
+
+                    // Add to history only if lesson config is valid
+                    if (currentLessonConfig.learn_lang && currentLessonConfig.input_lang && currentLessonConfig.output_lang) {
+                        if (!user_state.lesson_history_summary) user_state.lesson_history_summary = [];
+                        user_state.lesson_history_summary.push({
+                            date_utc: new Date().toISOString(),
+                            lang_pair: `${currentLessonConfig.input_lang}-${currentLessonConfig.output_lang}`,
+                            learn_lang: currentLessonConfig.learn_lang,
+                            key_takeaway: summaryText.substring(0, 100) + (summaryText.length > 100 ? "..." : "")
+                        });
+                    } else {
+                        console.warn("Skipping adding lesson to history due to incomplete lesson config at conclusion.", currentLessonConfig);
+                    }
+                } else {
+                    throw new Error("Invalid LLM response structure for lesson summary.");
+                }
+            } catch (error) {
+                console.error("Error concluding lesson with LLM:", error);
+                displayTutorMessage('tutorErrorOllamaResponse');
+                // Still add a generic history item if config is valid, as the lesson did happen
+                if (currentLessonConfig.learn_lang && currentLessonConfig.input_lang && currentLessonConfig.output_lang) {
+                    if (!user_state.lesson_history_summary) user_state.lesson_history_summary = [];
+                     user_state.lesson_history_summary.push({
+                        date_utc: new Date().toISOString(),
+                        lang_pair: `${currentLessonConfig.input_lang}-${currentLessonConfig.output_lang}`,
+                        learn_lang: currentLessonConfig.learn_lang,
+                        key_takeaway: "Lesson completed (summary generation error)."
+                    });
+                }
+            } finally {
+                // Clear current lesson data from user_state and save
+                if (user_state.current_lesson_data) {
+                    user_state.current_lesson_data = { input_lang: null, output_lang: null, interactions: [] };
+                }
+                saveUserState();
+                displayTutorMessage('tutorLessonComplete');
+                exitTutoringMode(); // This will also call saveUserState again, which is fine.
+            }
+        }
+
+        function initiateTutoringSession() {
+            if (isTutoringActive) {
+                if (confirm("A tutoring session is already active. Do you want to end it and start a new one?")) {
+                    exitTutoringMode(false);
+                } else {
+                    return;
+                }
+            }
+            if (isAiResponding || isTutorResponding) {
+                alert("Please wait for the current AI response to complete.");
+                return;
+            }
+
+            isTutoringActive = true;
+            setAgentStatus('tutoring');
+            updateStudyButtonText();
+            disableChatInputForTutor();
+
+            loadUserState();
+
+            const lastLearnLang = user_state.user_preferences.last_learn_lang;
+            const lastInputLang = user_state.user_preferences.last_input_lang;
+            const lastOutputLang = user_state.user_preferences.last_output_lang;
+
+            if (lastLearnLang && lastInputLang && lastOutputLang) {
+                displayTutorMessage('tutorWelcomeBack', 'tutor', {
+                    last_learn_lang: lastLearnLang,
+                    last_input_lang: lastInputLang,
+                    last_output_lang: lastOutputLang
+                });
+                expectedTutorResponseHandler = handleInitialTutorInteraction;
+            } else {
+                displayTutorMessage('tutorAskLanguageDirection');
+                expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
+            }
+            enableChatInputAfterTutor(true);
+            chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
+            chatInput.focus();
+            closePopup(settingsPanel);
+            closePopup(aboutPopupOverlay);
+            closePopup(learnerStatsPopupOverlay);
+        }
+
+        function exitTutoringMode(showMessage = true) {
+            if (showMessage) displayTutorMessage('tutorExiting');
+            isTutoringActive = false;
+            isTutorResponding = false;
+            expectedTutorResponseHandler = null;
+            lesson_sentences = [];
+            current_sentence_index = 0;
+            lesson_interactions = [];
+            currentLessonConfig = { learn_lang: null, input_lang: null, output_lang: null };
+
+            if(user_state && user_state.current_lesson_data) {
+                user_state.current_lesson_data = { input_lang: null, output_lang: null, interactions: [] };
+                saveUserState(); // Save the cleared current_lesson_data
+            }
+
+            setAgentStatus('active');
+            updateStudyButtonText();
+            enableChatInputAfterTutor(false);
+        }
+
+        if (startStudyBtnMain) {
+            startStudyBtnMain.addEventListener('click', initiateTutoringSession);
+        }
+
+        if (clearLearningProgressBtn) {
+            clearLearningProgressBtn.addEventListener('click', () => {
+                if (confirm(getTranslation('confirmClearLearningProgress'))) {
+                    localStorage.removeItem(USER_STATE_KEY);
+                    user_state = getDefaultUserState();
+                    if (isTutoringActive) {
+                        exitTutoringMode(false);
+                    }
+                    displaySystemMessage('learningProgressCleared');
+                    updateStudyButtonText();
+                    if (settingsPanel.classList.contains('is-open')) {
+                        settingsPanel.classList.remove('is-open');
+                    }
+                }
+            });
+        }
+
+        // --- END TUTORING FEATURE IMPLEMENTATION ---
+
+
+        if (sendButton && chatInput) {
+            const handleSendMessage = async () => {
+                const userText = chatInput.value.trim();
+
+                if (isTutoringActive) {
+                    if (isTutorResponding) return;
+                    if (!userText) return;
+
+                    addNewMessage(userText, 'user');
+                    chatInput.value = '';
+                    disableChatInputForTutor();
+
+                    if (expectedTutorResponseHandler) {
+                        await expectedTutorResponseHandler(userText);
+                    } else {
+                        console.warn("Tutoring active but no response handler set.");
+                        enableChatInputAfterTutor(true);
+                    }
+                    return;
+                }
+
+                if (isAiResponding) return;
+
+                const originalImageForProcessing = currentOriginalImageBase64DataUri;
+                const previewImageForHistory = currentResizedPreviewDataUri;
+                const hasImageToSend = !!originalImageForProcessing;
+
+                if (!userText && !hasImageToSend) return;
+
+                addNewMessage(userText, 'user', hasImageToSend, previewImageForHistory);
+                chatInput.value = '';
+                chatInput.focus();
+                clearSelectedImageState();
+
+                isAiResponding = true;
+                setAgentStatus('typing');
+                sendButton.disabled = true;
+                if (attachFileBtn) attachFileBtn.disabled = true;
+                stopPeriodicOllamaHeaderCheck();
+
+                let ollamaApiImagePayload = null;
+                if (hasImageToSend && originalImageForProcessing) {
+                    try {
+                        const resizedForOllamaDataUri = await resizeImage(
+                            originalImageForProcessing,
+                            OLLAMA_IMAGE_MAX_DIMENSION_PX,
+                            OLLAMA_IMAGE_MAX_DIMENSION_PX,
+                            IMAGE_QUALITY_OLLAMA
+                        );
+                        ollamaApiImagePayload = resizedForOllamaDataUri.split(',')[1];
+                    } catch (err) {
+                        console.error("Error resizing image for Ollama:", err);
+                        if (originalImageForProcessing) {
+                           const parts = originalImageForProcessing.split(',');
+                           if (parts.length > 1) ollamaApiImagePayload = parts[1];
+                        }
+                    }
+                }
+
+                const chatHistoryString = getChatHistoryForPrompt();
+                const ollamaPrompt = constructOllamaPrompt(userText, chatHistoryString, hasImageToSend);
+
+                let aiMessageElement;
+                let accumulatedAiResponse = "";
+                const streamEnabled = streamResponsesToggle ? streamResponsesToggle.checked : true;
+
+                if (streamEnabled) {
+                    aiMessageElement = createVisualAiMessage();
+                }
+
+                try {
+                    if (streamEnabled) {
+                        await callOllamaApi(ollamaPrompt, (token) => {
+                            accumulatedAiResponse += token;
+                            const contentDiv = aiMessageElement.querySelector('.message-content');
+                            if (contentDiv) {
+                                contentDiv.innerHTML = formatAiMessageContent(accumulatedAiResponse);
+                            }
+                            scrollToBottom();
+                        }, ollamaApiImagePayload);
+
+                        const finalTimestamp = Date.now();
+                        const timeDiv = aiMessageElement.querySelector('.message-time');
+                         if (timeDiv) {
+                            timeDiv.textContent = new Date(finalTimestamp).toLocaleTimeString(currentLanguage, { hour: 'numeric', minute: '2-digit' });
+                         }
+                        saveMessageToHistory({ text: accumulatedAiResponse, type: 'ai', timestamp: finalTimestamp, hasImage: false, imageBase64: null });
+
+                    } else {
+                        const aiResponseText = await callOllamaApi(ollamaPrompt, () => {}, ollamaApiImagePayload);
+                        addNewMessage(aiResponseText, 'ai');
+                    }
+                    isOllamaReachableForHeader = true;
+                } catch (error) {
+                    console.error("Ollama processing error:", error);
+                    if (aiMessageElement && streamEnabled) {
+                        aiMessageElement.remove();
+                    }
+                    addNewMessage(getTranslation('ollamaError', { error: error.message || "Unknown error" }), 'ai');
+                    isOllamaReachableForHeader = false;
+                } finally {
+                    isAiResponding = false;
+                    setAgentStatus(isTutoringActive ? 'tutoring' : 'active');
+                    sendButton.disabled = isTutoringActive;
+                    if (attachFileBtn) attachFileBtn.disabled = isTutoringActive;
+                    startPeriodicOllamaHeaderCheck();
+                    if (isTutoringActive && expectedTutorResponseHandler) {
+                        enableChatInputAfterTutor(true);
+                    } else if (!isTutoringActive) {
+                        enableChatInputAfterTutor(false);
+                    }
+                }
+            };
+
+            sendButton.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    if (isTutoringActive && isTutorResponding) return;
+                    if (!isTutoringActive && isAiResponding) return;
+
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            });
+        }
+
+        // --- Initial Application Load ---
+        function initializeApp() {
+            const savedDarkModePref = localStorage.getItem(DARK_MODE_KEY);
+            setDarkMode(savedDarkModePref === 'true');
+
+            if (markdownToggle) {
+                const savedMarkdownPref = localStorage.getItem(MARKDOWN_ENABLED_KEY);
+                markdownToggle.checked = savedMarkdownPref === null ? true : (savedMarkdownPref === 'true');
+            }
+            const lastActiveTab = localStorage.getItem(ACTIVE_SETTINGS_TAB_KEY) || 'basic';
+            setActiveSettingsTab(lastActiveTab);
+
+
+            loadOllamaSettings();
+            loadUserState();
+            applyTranslations();
+            loadChatHistory();
+
+            if (typeof marked === 'undefined') {
+                console.warn("Marked.js library is not loaded. Markdown formatting will fallback to simple newline-to-br conversion for AI messages.");
+                if(markdownToggle) {
+                    markdownToggle.checked = false;
+                    markdownToggle.disabled = true;
+                }
+            } else {
+                marked.setOptions({
+                  breaks: true,
+                  gfm: true,
+                  pedantic: false,
+                  smartLists: true,
+                  smartypants: false
+                });
+            }
+
+            checkOllamaForHeaderUpdate().then(() => {
+                startPeriodicOllamaHeaderCheck();
+            });
+             // Close all popups on Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closePopup(settingsPanel);
+                    closePopup(aboutPopupOverlay);
+                    closePopup(learnerStatsPopupOverlay);
+                }
+            });
+        }
+
+        // --- Start the application ---
+        initializeApp();
+
+    </script>
+</body></html>
