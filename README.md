@@ -30,7 +30,7 @@ EN:
     *   "About TUTORAI" information.
     *   "Learner Stats" to view language learning progress.
 *   **Privacy-Focused:** Primarily designed for local operation. Chat data and images (if sent to Ollama) are processed by your local Ollama instance. No data is sent to external third-party servers by TUTORAI itself.
-*   **Bilingual UI Elements:** Basic UI text is translated (currently English). *(The provided HTML includes only English translations; this note is for completeness if more languages were added to the `translations` object).*
+*   **Bilingual UI Elements:** Basic UI text is translated (currently English).
 
 RU:
 *   **Единый HTML-файл:** Все приложение (HTML, CSS, JS) полностью автономно.
@@ -50,7 +50,7 @@ RU:
     *   Информация "О TUTORAI".
     *   "Статистика учащегося" для просмотра прогресса в изучении языков.
 *   **Ориентация на приватность:** В первую очередь предназначено для локальной работы. Данные чата и изображения (при отправке в Ollama) обрабатываются вашим локальным экземпляром Ollama. TUTORAI сам по себе не отправляет данные на сторонние серверы.
-*   **Двуязычные элементы интерфейса:** Базовый текст интерфейса переведен (в данный момент английский). *(Предоставленный HTML включает только английские переводы; это примечание для полноты, если в объект `translations` будут добавлены другие языки).*
+*   **Двуязычные элементы интерфейса:** Базовый текст интерфейса переведен (в данный момент английский).
 
 ---
 
