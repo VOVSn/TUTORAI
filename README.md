@@ -1,5 +1,5 @@
 
-# TUTORAI Chat
+# TUTORAI Chat (Minitutor/Минирепетитор)
 
 EN: A lightweight, privacy-focused, single-file HTML chat application designed for interacting with local AI models (like Ollama) and featuring an integrated language learning tutor. Remarkably, the entire application, including styles and JavaScript, is contained within this single HTML file, keeping its size minimal.
 
