@@ -171,16 +171,6 @@ TUTORAI разработан с учетом требований приватн
 
 ---
 
-## Contributing / Участие в разработке
-
-EN:
-Contributions are welcome! If you have suggestions or improvements, feel free to fork the repository (if this were on GitHub) or modify the code directly and share your enhancements.
-
-RU:
-Вклад в разработку приветствуется! Если у вас есть предложения или улучшения, не стесняйтесь форкнуть репозиторий (если бы он был на GitHub) или изменять код напрямую и делиться своими улучшениями.
-
----
-
 ## Author / Автор
 
 VOVSn - [github.com/VOVSn](https://github.com/VOVSn)
