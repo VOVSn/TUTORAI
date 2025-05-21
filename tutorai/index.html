@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate-key="pageTitle">TUTORAI Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="chat-app">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="agent-info">
+                <div>
+                    <div class="agent-name" data-translate-key="agentName">TUTORAI</div>
+                    <div class="agent-status" data-translate-key="agentStatusActive">Active</div>
+                </div>
+            </div>
+            <div class="header-icon-button" id="settingsButton" title="Settings">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <circle cx="12" cy="5" r="2"/>
+                    <circle cx="12" cy="12" r="2"/>
+                    <circle cx="12" cy="19" r="2"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Settings Panel (Popup) - Combined View -->
+        <div class="settings-panel" id="settingsPanel">
+            <div class="settings-panel-content">
+                <div class="settings-tabs">
+                    <button class="settings-tab-button active" data-tab="basic" data-translate-key="settingsTabBasic">Basic</button>
+                    <button class="settings-tab-button" data-tab="advanced" data-translate-key="settingsTabAdvanced">Advanced</button>
+                </div>
+
+                <div class="settings-tab-content active" id="settings-tab-basic">
+                    <div class="settings-row">
+                        <div class="settings-label" data-translate-key="darkModeLabel">Dark Mode</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label" data-translate-key="streamResponsesLabel">Stream Responses</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="streamResponsesToggle" checked="">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-label" data-translate-key="markdownLabel">Use Markdown</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="markdownToggle" checked="">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-group-title" data-translate-key="ollamaStatusTitle">Ollama Status</div>
+                    <div class="settings-row action-row">
+                        <button id="checkOllamaStatusBtn" class="settings-button" data-translate-key="checkOllamaBtn">Check Ollama</button>
+                        <span id="ollamaStatusText" class="status-text"></span>
+                    </div>
+
+                    <div class="settings-group-title" data-translate-key="applicationInfoTitle">Application Info</div>
+                     <div class="settings-row action-row">
+                        <button id="showAboutBtn" class="settings-button" data-translate-key="showAboutBtn">About TUTORAI</button>
+                    </div>
+                </div>
+
+                <div class="settings-tab-content" id="settings-tab-advanced">
+                    <div class="settings-group-title" data-translate-key="ollamaConfigTitle">Ollama Configuration</div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="ollamaEndpoint" data-translate-key="ollamaEndpointLabel">Endpoint URL</label>
+                        <input type="text" id="ollamaEndpoint" class="settings-input" placeholder="http://localhost:11434/api/generate">
+                    </div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="ollamaModel" data-translate-key="ollamaModelLabel">Model Name</label>
+                        <input type="text" id="ollamaModel" class="settings-input" placeholder="gemma3:4b">
+                    </div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="ollamaTemperature" data-translate-key="ollamaTemperatureLabel">Temperature</label>
+                        <input type="number" id="ollamaTemperature" class="settings-input" min="0.1" max="1.0" step="0.1">
+                    </div>
+
+                    <div class="settings-group-title" data-translate-key="chatDataTitle">Chat Data</div>
+                    <div class="settings-row action-row">
+                        <button id="clearChatHistoryBtn" class="settings-button danger" data-translate-key="clearChatHistoryBtn">Clear Chat History</button>
+                    </div>
+
+                    <!-- TUTORING FEATURE SETTINGS -->
+                    <div class="settings-group-title" data-translate-key="learningTitle">Learning</div>
+                    <div class="settings-row action-row">
+                        <button id="clearLearningProgressBtn" class="settings-button danger" data-translate-key="clearLearningProgressBtn">Clear Learning Progress</button>
+                    </div>
+                    <!-- END TUTORING FEATURE SETTINGS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- About Popup -->
+        <div id="aboutPopupOverlay" class="modal-popup-overlay">
+            <div class="modal-popup-container">
+                <div class="modal-popup-header">
+                    <h3 class="modal-popup-title" data-translate-key="aboutTitle">About TUTORAI</h3>
+                    <span class="modal-popup-close" id="closeAboutPopup">×</span>
+                </div>
+                <div class="modal-popup-content-scrollable">
+                    <div class="settings-about-text">
+                        <p data-translate-key="aboutP1">TUTORAI is a lightweight, privacy-focused chat application designed for interacting with local AI models like Ollama. It also features an integrated language learning tutor.</p>
+                        <p data-translate-key="aboutP2">Remarkably, this entire application, including all styles and functionalities, is contained within a single HTML file, keeping its size under 200KB!</p>
+                        <p>
+                            <span data-translate-key="aboutAuthorLabel">Author:</span> VOVSn |
+                            <span data-translate-key="aboutGithubLabel">GitHub:</span> <a href="https://github.com/VOVSn" target="_blank" rel="noopener noreferrer" data-translate-key="aboutGithubLinkText">github.com/VOVSn</a>
+                        </p>
+                        <p data-translate-key="aboutP4">This project is open-source. Contributions are welcome!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learner Stats Popup -->
+        <div id="learnerStatsPopupOverlay" class="modal-popup-overlay">
+            <div class="modal-popup-container">
+                <div class="modal-popup-header">
+                    <h3 class="modal-popup-title" data-translate-key="learnerStatsTitle">Your Learning Progress</h3>
+                    <span class="modal-popup-close" id="closeLearnerStatsPopup">×</span>
+                </div>
+                <div class="modal-popup-content-scrollable">
+                    <div id="learnerStatsContent">
+                        <!-- Stats will be populated here by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Chat Messages -->
+        <div class="chat-messages">
+            <!-- Messages will be appended here -->
+        </div>
+
+        <!-- Chat Input Area -->
+        <div class="chat-input-area">
+             <!-- Image Preview Area -->
+            <div id="imagePreviewContainer" style="display: none;">
+                <img id="imagePreview" src="#" alt="Image preview"/>
+                <button id="removeImageBtn" title="Remove image">×</button>
+            </div>
+            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+
+            <div class="input-controls-row">
+                <div class="additional-buttons">
+                    <!-- TUTORING FEATURE MAIN BUTTON -->
+                    <div class="circle-button" id="startStudyBtnMain" title="Start Study Session">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+                        </svg>
+                    </div>
+                    <!-- LEARNER STATS BUTTON -->
+                    <div class="circle-button" id="showLearnerStatsBtn" title="View Learning Progress">
+                        <svg viewBox="0 0 24 24" width="20" height="20">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <input type="text" class="chat-input" placeholder="Ask the AI something...">
+
+                <div class="circle-button" id="attachFileBtn" title="Upload Image">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    </svg>
+                </div>
+
+                <div class="send-button" title="Send Message">
+                    <div class="send-icon"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="script.js" defer></script>
+</body>
+</html>
