@@ -1,5 +1,5 @@
 
-# TUTORAI Chat
+# TUTORAI Chat (Minitutor/Минирепетитор)
 
 EN: A lightweight, privacy-focused, single-file HTML chat application designed for interacting with local AI models (like Ollama) and featuring an integrated language learning tutor. Remarkably, the entire application, including styles and JavaScript, is contained within this single HTML file, keeping its size minimal.
 
@@ -30,7 +30,7 @@ EN:
     *   "About TUTORAI" information.
     *   "Learner Stats" to view language learning progress.
 *   **Privacy-Focused:** Primarily designed for local operation. Chat data and images (if sent to Ollama) are processed by your local Ollama instance. No data is sent to external third-party servers by TUTORAI itself.
-*   **Bilingual UI Elements:** Basic UI text is translated (currently English). *(The provided HTML includes only English translations; this note is for completeness if more languages were added to the `translations` object).*
+*   **Bilingual UI Elements:** Basic UI text is translated (currently English).
 
 RU:
 *   **Единый HTML-файл:** Все приложение (HTML, CSS, JS) полностью автономно.
@@ -50,7 +50,7 @@ RU:
     *   Информация "О TUTORAI".
     *   "Статистика учащегося" для просмотра прогресса в изучении языков.
 *   **Ориентация на приватность:** В первую очередь предназначено для локальной работы. Данные чата и изображения (при отправке в Ollama) обрабатываются вашим локальным экземпляром Ollama. TUTORAI сам по себе не отправляет данные на сторонние серверы.
-*   **Двуязычные элементы интерфейса:** Базовый текст интерфейса переведен (в данный момент английский). *(Предоставленный HTML включает только английские переводы; это примечание для полноты, если в объект `translations` будут добавлены другие языки).*
+*   **Двуязычные элементы интерфейса:** Базовый текст интерфейса переведен (в данный момент английский).
 
 ---
 
@@ -146,17 +146,10 @@ RU:
 
 ## Technology Stack / Технологический стек
 
-EN:
 *   HTML5
 *   CSS3
 *   Vanilla JavaScript (ES6+)
 *   [Marked.js](https://marked.js.org/) (for Markdown rendering)
-
-RU:
-*   HTML5
-*   CSS3
-*   Чистый JavaScript (ES6+)
-*   [Marked.js](https://marked.js.org/) (для отображения Markdown)
 
 ---
 
@@ -178,20 +171,6 @@ TUTORAI разработан с учетом требований приватн
 
 ---
 
-## Contributing / Участие в разработке
-
-EN:
-Contributions are welcome! If you have suggestions or improvements, feel free to fork the repository (if this were on GitHub) or modify the code directly and share your enhancements.
-
-RU:
-Вклад в разработку приветствуется! Если у вас есть предложения или улучшения, не стесняйтесь форкнуть репозиторий (если бы он был на GitHub) или изменять код напрямую и делиться своими улучшениями.
-
----
-
 ## Author / Автор
 
-EN:
-VOVSn - [github.com/VOVSn](https://github.com/VOVSn)
-
-RU:
 VOVSn - [github.com/VOVSn](https://github.com/VOVSn)
