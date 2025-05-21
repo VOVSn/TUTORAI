@@ -1,3 +1,5 @@
+/* tutorai/style.css */
+
 /* Global Styles */
 * {
     margin: 0;
@@ -6,43 +8,44 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     background-color: #e8e3d9;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-    transition: background-color 0.3s ease; /* Smooth transition for body background */
+    height: 100%; /* Ensure body takes full viewport height */
+    margin: 0; 
+    transition: background-color 0.3s ease;
+    overflow: hidden; /* Prevent scrollbars on body itself */
 }
 
 /* Main Chat Container */
 .chat-app {
-    width: 960px; /* Desktop width - Increased */
-    height: 720px; /* Desktop height - Increased */
+    width: 100%;
+    height: 100%;
     background: linear-gradient(145deg, #eae5db, #dcd7cd);
-    border-radius: 20px; /* Slightly less rounded for desktop */
-    box-shadow:
-        15px 15px 35px #c4c0b7,
-        -15px -15px 35px #fcf7ed;
-    overflow: hidden;
+    border-radius: 0; /* Typically 0 for full-window apps */
+    box-shadow: none; /* Typically none for full-window apps */
+    overflow: hidden; /* Important for children with overflow:auto */
     position: relative;
     display: flex;
     flex-direction: column;
-    transition: background 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Chat Header */
 .chat-header {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* To space out agent-info and settings button */
-    padding: 20px 25px; /* Increased padding */
+    justify-content: space-between; 
+    padding: 20px 25px; 
     background: linear-gradient(145deg, #eae5db, #e0dbd1);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    position: relative; /* For z-index context and settings panel positioning */
-    z-index: 2; /* Higher than chat-app::before, content */
+    position: relative; 
+    z-index: 2; 
     transition: background 0.3s ease, box-shadow 0.3s ease;
+    flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 .header-icon-button {
@@ -58,7 +61,7 @@ body {
         -4px -4px 8px #f5f0e5;
     cursor: pointer;
     transition: all 0.2s ease;
-    position: relative; /* For hover effect */
+    position: relative; 
 }
 .header-icon-button:active {
      box-shadow:
@@ -74,7 +77,7 @@ body {
 
 
 .agent-info {
-    flex-grow: 1; /* Allow agent-info to take available space */
+    flex-grow: 1; 
     display: flex;
     align-items: center;
 }
@@ -93,23 +96,23 @@ body {
     transition: color 0.3s ease;
 }
 .agent-status.reachable {
-    color: #4CAF50; /* Green for reachable */
+    color: #4CAF50; 
 }
 .agent-status.not-reachable {
-    color: #F44336; /* Red for not reachable */
+    color: #F44336; 
 }
-.agent-status.tutoring { /* New status for tutoring mode */
-    color: #2196F3; /* Blue for tutoring */
+.agent-status.tutoring { 
+    color: #2196F3; 
 }
 
 
 /* Settings Panel (Popup) */
 .settings-panel {
     position: absolute;
-    top: 75px; /* Position below header */
-    right: 25px; /* Align with header padding */
+    top: 75px; 
+    right: 25px; 
     width: 320px;
-    max-height: calc(100vh - 100px - 20px - 40px); /* Max height considering header, tabs and some padding */
+    max-height: calc(100vh - 100px - 20px - 40px); 
     background: linear-gradient(145deg, #e8e3d9, #dcd7cd);
     border-radius: 15px;
     box-shadow: 8px 8px 16px #c4c0b7, -8px -8px 16px #fcf7ed;
@@ -132,9 +135,9 @@ body {
     pointer-events: auto;
 }
 
-.settings-panel-content { /* New wrapper for all settings items */
+.settings-panel-content { 
     padding: 20px;
-    padding-top: 0; /* Tabs will have their own space */
+    padding-top: 0; 
     flex-grow: 1;
     overflow-y: auto;
     display: flex;
@@ -146,8 +149,8 @@ body {
     display: flex;
     margin-bottom: 15px;
     border-bottom: 1px solid #c5bdab;
-    flex-shrink: 0; /* Prevent tabs from shrinking */
-    padding-top: 15px; /* Give tabs some top space */
+    flex-shrink: 0; 
+    padding-top: 15px; 
 }
 .settings-tab-button {
     padding: 10px 15px;
@@ -170,11 +173,11 @@ body {
 }
 
 .settings-tab-content {
-    display: none; /* Hide by default */
-    flex-grow: 1; /* Allow content to take up space if needed */
+    display: none; 
+    flex-grow: 1; 
 }
 .settings-tab-content.active {
-    display: block; /* Show active tab content */
+    display: block; 
 }
  .settings-tab-content .settings-group-title:first-child {
     margin-top: 0;
@@ -199,7 +202,7 @@ body {
     flex-shrink: 0;
     margin-right: 10px;
 }
-.settings-panel select.settings-input { /* Kept for potential future selects */
+.settings-panel select.settings-input { 
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -207,7 +210,7 @@ body {
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: .65em auto;
-    padding-right: 30px; /* Make space for arrow */
+    padding-right: 30px; 
 }
 
 
@@ -318,7 +321,7 @@ input:checked + .toggle-slider:before {
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    flex-grow: 1; /* Allow buttons in action-row to take space if needed */
+    flex-grow: 1; 
     text-align: center;
 }
 .settings-button:active {
@@ -377,9 +380,9 @@ input:checked + .toggle-slider:before {
 
 /* Chat Messages Area */
 .chat-messages {
-    flex: 1;
+    flex: 1; /* This means flex-grow: 1, flex-shrink: 1, flex-basis: 0% */
     padding: 20px 25px;
-    overflow-y: auto;
+    overflow-y: auto; /* Allow vertical scrolling */
     background: linear-gradient(125deg, #e6e1d7, #dbd6cc);
     box-shadow:
         inset 5px 5px 15px #cbc6bd,
@@ -389,6 +392,7 @@ input:checked + .toggle-slider:before {
     position: relative;
     z-index: 1;
     transition: background 0.3s ease, box-shadow 0.3s ease;
+    min-height: 0; /* ADD THIS LINE - Crucial for flex item with overflow */
 }
 
 /* Base message style */
@@ -409,12 +413,12 @@ input:checked + .toggle-slider:before {
     font-size: 1.1em;
 }
 .message-image-preview {
-    max-width: 300px; /* Increased from 150px */
-    max-height: 300px; /* Increased from 150px */
+    max-width: 300px; 
+    max-height: 300px; 
     border-radius: 8px;
     margin-bottom: 8px;
     display: block;
-    background-color: #dcd7cd; /* Fallback bg for image loading */
+    background-color: #dcd7cd; 
     transition: background-color 0.3s ease;
 }
 .message-image-fallback-icon {
@@ -449,7 +453,7 @@ input:checked + .toggle-slider:before {
 .message.tutor .message-content p:last-child {
     margin-bottom: 0;
 }
-.message.ai .message-content code, /* Basic styling for inline code */
+.message.ai .message-content code, 
 .message.tutor .message-content code {
     background-color: rgba(0,0,0,0.05);
     padding: 2px 4px;
@@ -457,7 +461,7 @@ input:checked + .toggle-slider:before {
     font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
     font-size: 0.9em;
 }
-.message.ai .message-content pre, /* Basic styling for code blocks */
+.message.ai .message-content pre, 
 .message.tutor .message-content pre {
     background-color: rgba(0,0,0,0.05);
     padding: 10px;
@@ -470,7 +474,7 @@ input:checked + .toggle-slider:before {
     background-color: transparent;
     padding: 0;
     border-radius: 0;
-    font-size: 1em; /* Reset from inline */
+    font-size: 1em; 
 }
 
 
@@ -501,7 +505,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* AI message style */
-.message.ai, .message.tutor { /* Apply AI style to tutor messages as a base */
+.message.ai, .message.tutor { 
     align-self: flex-start;
     background: linear-gradient(145deg, #e8e3d9, #dcd7cd);
     border-radius: 18px 18px 18px 4px;
@@ -574,6 +578,7 @@ input:checked + .toggle-slider:before {
     position: relative;
     z-index: 1;
     transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    flex-shrink: 0; /* Prevent input area from shrinking */
 }
 .input-controls-row {
     display: flex;
@@ -597,10 +602,10 @@ input:checked + .toggle-slider:before {
 }
 #imagePreview {
     display: block;
-    max-width: 200px; /* Increased from 100px */
-    max-height: 200px; /* Increased from 100px */
+    max-width: 200px; 
+    max-height: 200px; 
     border-radius: 8px;
-    background-color: #dcd7cd; /* Fallback bg for image loading */
+    background-color: #dcd7cd; 
     transition: background-color 0.3s ease;
 }
 #removeImageBtn {
@@ -627,9 +632,9 @@ input:checked + .toggle-slider:before {
 
 .additional-buttons {
     display: flex;
-    gap: 15px; /* Spacing between buttons within this container */
-    margin-right: 15px; /* Space between this container and the chat input */
-    flex-shrink: 0; /* Prevent these buttons from shrinking */
+    gap: 15px; 
+    margin-right: 15px; 
+    flex-shrink: 0; 
 }
 
 .circle-button {
@@ -647,10 +652,10 @@ input:checked + .toggle-slider:before {
     transition: all 0.2s ease;
     border: 1px solid rgba(173, 157, 124, 0.1);
     position: relative;
-    flex-shrink: 0; /* Prevent individual buttons from shrinking */
+    flex-shrink: 0; 
 }
 
-#attachFileBtn { /* Specific margin for the attach button in its new position */
+#attachFileBtn { 
     margin-left: 10px;
 }
 
@@ -667,7 +672,7 @@ input:checked + .toggle-slider:before {
         inset -2px -2px 4px #f5f0e5;
 }
 
-.circle-button svg { /* General style for SVGs in circle buttons */
+.circle-button svg { 
     width: 20px;
     height: 20px;
     fill: #847c6f;
@@ -689,6 +694,7 @@ input:checked + .toggle-slider:before {
     border: 1px solid rgba(173, 157, 124, 0.1);
     transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     width: 100%;
+    min-width: 50px; 
 }
  .chat-input::placeholder {
     color: #847c6f;
@@ -742,7 +748,7 @@ input:checked + .toggle-slider:before {
 /* Custom Scrollbar */
 .chat-messages::-webkit-scrollbar,
 .settings-panel-content::-webkit-scrollbar,
-.modal-popup-content-scrollable::-webkit-scrollbar { /* Apply to popups too */
+.modal-popup-content-scrollable::-webkit-scrollbar { 
     width: 8px;
 }
 
@@ -769,26 +775,8 @@ input:checked + .toggle-slider:before {
 
 
 /* Golden shimmer effect for chat app background */
-.chat-app::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        45deg,
-        transparent 0%,
-        rgba(255, 215, 0, 0.03) 25%,
-        rgba(255, 215, 0, 0.06) 50%,
-        rgba(255, 215, 0, 0.03) 75%,
-        transparent 100%
-    );
-    border-radius: 20px;
-    z-index: 0;
-    pointer-events: none;
-    transition: background 0.3s ease;
-}
+/* .chat-app::before { ... } */ /* Removed as .chat-app is now full window with no border-radius/shadow */
+
 
 /* Shimmer effect for buttons on hover */
 .circle-button::before,
@@ -833,7 +821,7 @@ input:checked + .toggle-slider:before {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 11; /* Above settings panel */
+    z-index: 11; 
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-out, visibility 0s linear 0.2s;
@@ -889,8 +877,8 @@ input:checked + .toggle-slider:before {
 .modal-popup-content-scrollable {
     overflow-y: auto;
     flex-grow: 1;
-    padding-right: 10px; /* Space for scrollbar */
-    margin-right: -10px; /* Counteract padding for scrollbar */
+    padding-right: 10px; 
+    margin-right: -10px; 
 }
 
 /* Styles for Learner Stats content */
@@ -907,7 +895,7 @@ input:checked + .toggle-slider:before {
     margin-top: 0;
 }
 #learnerStatsContent ul {
-    list-style-type: none; /* Remove default bullets */
+    list-style-type: none; 
     padding-left: 0;
     margin-bottom: 10px;
 }
@@ -947,7 +935,7 @@ body.dark-mode {
 
 .dark-mode .chat-app {
     background: linear-gradient(145deg, #3a3d42, #2f3136);
-    box-shadow: 15px 15px 30px #25272b, -15px -15px 30px #45494f;
+    box-shadow: none; 
 }
 
 .dark-mode .chat-header {
@@ -956,8 +944,8 @@ body.dark-mode {
 }
 .dark-mode .agent-name { color: #e0e0e0; }
 .dark-mode .agent-status { color: #a0a0a0; }
-/* .agent-status.reachable/not-reachable colors are absolute, so they remain */
-.dark-mode .agent-status.tutoring { color: #64B5F6; } /* Lighter blue for dark mode */
+
+.dark-mode .agent-status.tutoring { color: #64B5F6; } 
 
 
 .dark-mode .header-icon-button {
@@ -1012,7 +1000,7 @@ body.dark-mode {
     background: linear-gradient(145deg, #404348, #303237);
 }
 .dark-mode input:checked + .toggle-slider {
-    background: linear-gradient(145deg, #527FFF, #4065CC); /* Using a blue accent for checked toggles in dark mode */
+    background: linear-gradient(145deg, #527FFF, #4065CC); 
 }
 .dark-mode input:checked + .toggle-slider:before {
     background: linear-gradient(145deg, #608BFF, #5075DD);
@@ -1056,20 +1044,20 @@ body.dark-mode {
     background: linear-gradient(125deg, #33363b, #2b2d31);
     box-shadow: inset 5px 5px 15px #232528, inset -5px -5px 15px #404449;
 }
-.dark-mode .message { color: #d0d0d0; } /* Default text color inside messages */
+.dark-mode .message { color: #d0d0d0; } 
 
 .dark-mode .message-image-preview { background-color: #2b2d31; }
 .dark-mode .message-image-fallback-icon { fill: #808080; }
 
 .dark-mode .message.ai .message-content code,
 .dark-mode .message.tutor .message-content code {
-    background-color: #282a2e; /* Slightly darker than message bg */
+    background-color: #282a2e; 
     color: #cccccc;
     border: 1px solid #3a3d42;
 }
 .dark-mode .message.ai .message-content pre,
 .dark-mode .message.tutor .message-content pre {
-    background-color: #25272b; /* Even darker for block */
+    background-color: #25272b; 
     color: #cccccc;
     border: 1px solid #3a3d42;
 }
@@ -1165,16 +1153,7 @@ body.dark-mode {
 }
 
 /* Dark Mode Shimmer */
-.dark-mode .chat-app::before {
-    background: linear-gradient(
-        45deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.015) 25%, /* Lighter, less saturated shimmer */
-        rgba(255, 255, 255, 0.03) 50%,
-        rgba(255, 255, 255, 0.015) 75%,
-        transparent 100%
-    );
-}
+/* .dark-mode .chat-app::before { ... } */ /* Removed as .chat-app is now full window with no border-radius/shadow */
 
 .dark-mode .circle-button::before,
 .dark-mode .send-button::before,
@@ -1183,14 +1162,14 @@ body.dark-mode {
     background: linear-gradient(
         135deg,
         transparent 30%,
-        rgba(255, 255, 255, 0.08) 50%, /* Lighter shimmer for buttons */
+        rgba(255, 255, 255, 0.08) 50%, 
         transparent 70%
     );
 }
 
 /* Dark Mode Modal Popup Styles */
 .dark-mode .modal-popup-overlay {
-    background-color: rgba(0, 0, 0, 0.5); /* Slightly darker backdrop */
+    background-color: rgba(0, 0, 0, 0.5); 
 }
 .dark-mode .modal-popup-container {
     background: linear-gradient(145deg, #3a3d42, #2f3136);

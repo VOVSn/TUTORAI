@@ -5,8 +5,8 @@ import threading
 import random # For a random port
 
 # --- Flask App Setup to Serve Static Files ---
-# The 'tutorai_app' subfolder contains your UI
-static_dir = os.path.join(os.path.dirname(__file__), 'tutorai')
+# The 'tutorai' subfolder contains your UI (corrected from 'tutorai_app')
+static_dir = os.path.join(os.path.dirname(__file__), 'tutorai') # Corrected path
 app = Flask(__name__, static_folder=static_dir, static_url_path='')
 
 @app.route('/')
@@ -21,18 +21,29 @@ def serve_static(filename):
 
 def run_flask_app(host='127.0.0.1', port=None):
     """Runs the Flask app in a separate thread."""
-    if port is None:
-        port = random.randint(49152, 65535) # Get a random free port
-    print(f"Flask server starting on http://{host}:{port}")
-    try:
-        app.run(host=host, port=port, debug=False) # Set debug=False for production
-    except OSError as e:
-        if e.errno == 98: # Address already in use
-            print(f"Port {port} is already in use. Trying another one...")
-            run_flask_app(host=host, port=random.randint(49152, 65535))
-        else:
-            raise
-    return port
+    actual_port = port
+    if actual_port is None:
+        actual_port = random.randint(49152, 65535) # Get a random free port
+    
+    is_running = False
+    while not is_running:
+        try:
+            print(f"Attempting to start Flask server on http://{host}:{actual_port}")
+            app.run(host=host, port=actual_port, debug=False) # Set debug=False for production
+            is_running = True # Should not be reached if app.run is blocking
+        except OSError as e:
+            if e.errno == 98: # Address already in use
+                print(f"Port {actual_port} is already in use. Trying another one...")
+                actual_port = random.randint(49152, 65535)
+            else:
+                print(f"An unexpected OSError occurred: {e}")
+                raise # Re-raise other OS errors
+        except Exception as e:
+            print(f"An unexpected error occurred while starting Flask: {e}")
+            raise # Re-raise other exceptions
+    # This part of the function (returning port) will not be reached if app.run() is blocking
+    # and successful. The port is passed to the thread.
+    # The function is run in a thread, so it doesn't need to return the port to the main thread here.
 
 
 # --- pywebview Window Creation ---
@@ -57,9 +68,9 @@ if __name__ == '__main__':
 
     print(f"Waiting for Flask server to start on port {flask_port}...")
     # A small delay to ensure Flask starts before pywebview tries to load the URL
-    # You might need a more robust check in a production app
+    # A more robust check might involve trying to connect to the port.
     import time
-    time.sleep(1) # Adjust if needed
+    time.sleep(2) # Increased sleep slightly, adjust if needed
 
     api_instance = Api() # If you have Python functions to expose
 
@@ -74,10 +85,12 @@ if __name__ == '__main__':
         js_api=api_instance, # Expose Python functions to JavaScript (optional)
         width=1000,          # Initial window width
         height=760,          # Initial window height
-        resizable=True,
+        resizable=True,      # Window is resizable
+        # min_size=(600, 400), # Optional: Set a minimum size if desired
         # frameless=False,   # Set to True for a window without standard frame
         # easy_drag=True     # If frameless, allows dragging by clicking anywhere
     )
 
     # Start the pywebview event loop (and Flask in its thread)
-    webview.start(debug=True) # Set debug=True for pywebview's own debugging features during development
+    # 1. Changed debug to False for pywebview's own devtools
+    webview.start(debug=False)

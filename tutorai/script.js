@@ -89,14 +89,13 @@ async function fetchTranslations() {
             throw new Error(`HTTP error! status: ${response.status}. Failed to fetch 'translations.json'. Check path, server configuration, and if the file exists at 'tutorai/translations.json'.`);
         }
         const loadedTranslations = await response.json();
-        // Basic sanity check for loaded translations
-        if (typeof loadedTranslations !== 'object' || loadedTranslations === null || !loadedTranslations.en || Object.keys(loadedTranslations.en).length < 10) { // Check for 'en' and a reasonable number of keys
+        if (typeof loadedTranslations !== 'object' || loadedTranslations === null || !loadedTranslations.en || Object.keys(loadedTranslations.en).length < 10) {
             console.warn("Translations file loaded, but content seems invalid, empty, or missing sufficient 'en' keys. Content:", loadedTranslations);
             throw new Error("Translations file content is invalid or incomplete.");
         }
         translations = loadedTranslations;
         console.info("Translations loaded successfully.");
-        return true; // Success
+        return true;
     } catch (error) {
         console.error("Could not load or parse translations.json:", error);
         // Fallback to a more comprehensive set of default English strings
@@ -133,16 +132,59 @@ async function fetchTranslations() {
                 dateYesterday: "Yesterday (Default)",
                 userImagePreviewAlt: "User image preview (Default)",
                 systemMsgTranslationsFailed: "Warning: UI translations failed to load. Some text may appear as placeholders. Please check the browser console (F12) for error details (e.g., if 'translations.json' was not found or is malformed).",
-                // Add more critical keys as needed for basic operation
                 confirmClearHistory: "Are you sure you want to clear all chat history from your browser's storage? This action cannot be undone. (Default)",
                 ollamaError: "Error communicating with AI: {error} (Default)",
+                
+                // --- ADDED/UPDATED CRITICAL KEYS FOR FALLBACK ---
+                ollamaPromptSystem: "You are a helpful AI assistant named TUTORAI. The user is communicating in English. Your task is to provide a helpful and concise response to the user's current query, strictly in English. Use Markdown for formatting if appropriate (e.g., lists, bold, italics). If an image is provided, analyze it in conjunction with the text prompt. (Default Prompt)",
+                ollamaPromptUserLabel: "User (Default)",
+                ollamaPromptAiLabel: "TUTORAI (Default)",
+                systemMsgLoadedFromFile: "Loaded history from chat_history.json. (Default)",
+                systemMsgLoadedFromStorage: "Loaded history from browser storage. (Default)",
+                systemMsgNoHistory: "No chat history found. (Default)",
+                systemMsgHistoryCleared: "Chat history cleared. (Default)",
+                ollamaStatusChecking: "Checking... (Default)",
+                ollamaStatusRunning: "Ollama Running (Default)",
+                ollamaStatusOKUnexpected: "Reachable (OK, unexpected content) (Default)",
+                ollamaStatusReachableWithCode: "Reachable (Status: {status}) (Default)",
+                ollamaStatusNotReachable: "Not Reachable (Default)",
+                ollamaStatusInvalidURL: "Invalid URL (Default)",
+
                 learningTitle: "Learning (Default)",
                 studySessionBtn: "Start Study Session (Default)",
+                studySessionBtnContinue: "Study: {learn_lang} (Default)",
                 clearLearningProgressBtn: "Clear Learning Progress (Default)",
                 confirmClearLearningProgress: "Are you sure you want to clear all your learning progress? (Default)",
+                learningProgressCleared: "Learning progress cleared. (Default)",
                 learnerStatsTitle: "Your Learning Progress (Default)",
                 viewLearningProgressTitle: "View Learning Progress (Default)",
+                noLearningDataFound: "No learning data found. (Default)",
+                languagesPracticedTitle: "Languages Practiced (Default)",
+                noLanguagesPracticedYet: "You haven't practiced any languages yet. (Default)",
+                currentLearningFocusTitle: "Current Learning Focus (Default)",
+                lessonHistoryTitle: "Recent Lesson History (Default)",
+                errorLoadingLearningData: "Error loading learning data. (Default)",
                 aboutTitle: "About TUTORAI (Default)",
+                aboutP1: "TUTORAI is a lightweight, privacy-focused chat application... (Default)",
+                aboutP2: "Remarkably, this entire application... (Default)",
+                aboutAuthorLabel: "Author: (Default)",
+                aboutGithubLabel: "GitHub: (Default)",
+                aboutGithubLinkText: "github.com/VOVSn (Default)",
+                aboutP4: "This project is open-source. (Default)",
+
+                tutorWelcomeBack: "Welcome back! Last time you were practicing {last_learn_lang}... (Default)",
+                tutorAskLanguageDirection: "What language would you like to learn...? (Default)",
+                tutorAskDirectionClarification: "Okay, {learn_lang}! And would you like to translate...? (Default)",
+                tutorUnclearIntent: "I'm sorry, I didn't quite catch that. (Default)",
+                tutorReadyToStartLesson: "Great! Let's start your {learn_lang} lesson... (Default)",
+                tutorTranslateThis: "Please translate this sentence to {output_lang}: (Default)",
+                tutorLessonComplete: "Lesson complete! Well done. (Default)",
+                tutorExiting: "Exiting tutoring mode. (Default)",
+                tutorErrorGeneral: "An error occurred in the tutoring session. (Default)",
+                tutorErrorOllamaResponse: "Sorry, I couldn't understand the learning model's response. (Default)",
+                tutorErrorNoSentences: "Sorry, I couldn't get sentences for you. (Default)",
+                tutorChatInputPlaceholder: "Enter your response or translation... (Default)",
+                tutorChatInputTranslationPlaceholder: "Enter your translation to {output_lang}... (Default)"
              }
         };
         return false; // Failure
@@ -151,7 +193,7 @@ async function fetchTranslations() {
 
 // --- Translation Functions ---
 function getTranslation(key, replacements = {}) {
-    let translation = translations[currentLanguage]?.[key] || key;
+    let translation = translations[currentLanguage]?.[key] || key; // Fallback to key itself if not found
     for (const placeholder in replacements) {
         translation = translation.replace(`{${placeholder}}`, replacements[placeholder]);
     }
@@ -163,39 +205,30 @@ function applyTranslations() {
         const key = el.dataset.translateKey;
         const isButton = (el.tagName === 'INPUT' && el.type === 'button') || el.tagName === 'BUTTON';
         const isTitleElement = el.tagName === 'TITLE';
-        const isPlaceholder = el.hasAttribute('placeholder') && el.tagName === 'INPUT';
+        // const isPlaceholder = el.hasAttribute('placeholder') && el.tagName === 'INPUT'; // Not used this way currently
 
-        if (el.id === 'startStudyBtnMain') return; // Handled by updateStudyButtonText
+        if (el.id === 'startStudyBtnMain') return; 
 
         if (isButton || isTitleElement) {
             el.textContent = getTranslation(key);
-        } else if (isPlaceholder) {
-            // Placeholders on inputs with data-translate-key are not generically handled here.
-            // They are handled by specific assignments below if needed, or by specific keys.
-            // e.g. chatInput.placeholder uses its own logic.
-            // If you want generic placeholder translation, you'd do:
-            // el.placeholder = getTranslation(key);
-            // But current HTML structure uses specific keys for placeholders.
+        } else if (el.hasAttribute('placeholder') && el.tagName === 'INPUT' && key) { // Generic placeholder handling
+             el.placeholder = getTranslation(key);
         } else {
             el.textContent = getTranslation(key);
         }
     });
 
-    // Specific assignments (some might be redundant if data-translate-key is on the element already, but harmless)
-    // The <title> element is already handled by the loop above if it has data-translate-key.
-    // if (document.querySelector('title')) {
-    //      document.querySelector('title').textContent = getTranslation('pageTitle');
-    // }
     if (agentNameDiv) agentNameDiv.textContent = getTranslation('agentName');
     setAgentStatus(isAiResponding ? 'typing' : (isTutoringActive ? 'tutoring' : 'active'));
 
     if (settingsButton) settingsButton.title = getTranslation('settingsTitle');
 
-    if (ollamaEndpointInput) ollamaEndpointInput.placeholder = getTranslation('ollamaEndpointPlaceholder');
-    if (ollamaModelInput) ollamaModelInput.placeholder = getTranslation('ollamaModelPlaceholder');
-
+    // Specific placeholders if not covered by data-translate-key generic handling
+    if (ollamaEndpointInput && !ollamaEndpointInput.dataset.translateKey) ollamaEndpointInput.placeholder = getTranslation('ollamaEndpointPlaceholder');
+    if (ollamaModelInput && !ollamaModelInput.dataset.translateKey) ollamaModelInput.placeholder = getTranslation('ollamaModelPlaceholder');
+    
     if (attachFileBtn) attachFileBtn.title = getTranslation('attachFileTitle');
-    if (chatInput) chatInput.placeholder = isTutoringActive ? getTranslation('tutorChatInputPlaceholder') : getTranslation('chatInputPlaceholder');
+    if (chatInput && !chatInput.dataset.translateKey) chatInput.placeholder = isTutoringActive ? getTranslation('tutorChatInputPlaceholder') : getTranslation('chatInputPlaceholder');
     if (sendButton) sendButton.title = getTranslation('sendMessageTitle');
     if (showLearnerStatsBtn) showLearnerStatsBtn.title = getTranslation('viewLearningProgressTitle');
 
@@ -242,19 +275,29 @@ function updateAgentHeaderStatus() {
     }
 }
 
-function setAgentStatus(statusKey) {
+function setAgentStatus(statusKey) { // statusKey is like 'typing', 'tutoring', 'active'
     if (agentStatusDiv) {
-        agentStatusDiv.classList.remove('reachable', 'not-reachable', 'tutoring');
-        if (statusKey === 'typing') {
-            agentStatusDiv.textContent = getTranslation('agentStatusTyping');
-        } else if (statusKey === 'tutoring') {
-            agentStatusDiv.classList.add('tutoring');
-            agentStatusDiv.textContent = getTranslation('agentStatusTutoring');
-        } else {
-            updateAgentHeaderStatus();
+        agentStatusDiv.classList.remove('reachable', 'not-reachable', 'tutoring'); // Clear previous specific classes
+        let statusText = '';
+        switch (statusKey) {
+            case 'typing':
+                statusText = getTranslation('agentStatusTyping');
+                // No specific class for typing, just text
+                break;
+            case 'tutoring':
+                statusText = getTranslation('agentStatusTutoring');
+                agentStatusDiv.classList.add('tutoring');
+                break;
+            case 'active': // This implies checking reachability
+            default:
+                // This will set reachable/not-reachable class and text
+                updateAgentHeaderStatus(); 
+                return; // updateAgentHeaderStatus sets its own text
         }
+        agentStatusDiv.textContent = statusText;
     }
 }
+
 
 // --- Popup Management ---
 function openPopup(overlayElement) {
@@ -280,7 +323,7 @@ if (showAboutBtn && aboutPopupOverlay && closeAboutPopup) {
 function displayLearnerStats() {
     if (!learnerStatsPopupOverlay || !learnerStatsContent) return;
 
-    learnerStatsContent.innerHTML = ''; // Clear previous content
+    learnerStatsContent.innerHTML = ''; 
 
     const storedState = localStorage.getItem(USER_STATE_KEY);
     if (!storedState) {
@@ -301,19 +344,12 @@ function displayLearnerStats() {
                 let accuracyToDisplay = 0;
                 if (prof.overall_accuracy_estimate) {
                     let val = parseFloat(prof.overall_accuracy_estimate);
-                    if (isNaN(val)) {
-                        val = 0;
-                    }
+                    if (isNaN(val)) val = 0;
 
-                    if (val > 1 && val <= 100) { // e.g., 70 for 70%
-                        accuracyToDisplay = val;
-                    } else if (val >= 0 && val <= 1) { // e.g., 0.7 for 70%
-                        accuracyToDisplay = val * 100;
-                    } else if (val > 100) { // Erroneously large, e.g. 7000
-                        accuracyToDisplay = 100; // Cap at 100%
-                    } else { // Negative or other unexpected
-                        accuracyToDisplay = 0;
-                    }
+                    if (val > 1 && val <= 100) accuracyToDisplay = val;
+                    else if (val >= 0 && val <= 1) accuracyToDisplay = val * 100;
+                    else if (val > 100) accuracyToDisplay = 100;
+                    else accuracyToDisplay = 0;
                 }
 
                 html += `<li><strong>${lang.charAt(0).toUpperCase() + lang.slice(1)}:</strong>
@@ -347,7 +383,7 @@ function displayLearnerStats() {
 
         if (state.lesson_history_summary && state.lesson_history_summary.length > 0) {
             html += `<hr><h4>${getTranslation('lessonHistoryTitle')}</h4><ul>`;
-            const recentHistory = state.lesson_history_summary.slice(-5).reverse(); // Show last 5, newest first
+            const recentHistory = state.lesson_history_summary.slice(-5).reverse();
             recentHistory.forEach(item => {
                 const d = new Date(item.date_utc);
                 const dateDisplay = (item.date_utc && !isNaN(d.getTime())) ? d.toLocaleDateString(currentLanguage, { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
@@ -390,7 +426,6 @@ if (settingsButton && settingsPanel) {
     settingsButton.addEventListener('click', function(event) {
         event.stopPropagation();
         const isOpening = !settingsPanel.classList.contains('is-open');
-        // Close other popups if opening settings
         if (isOpening) {
             closePopup(aboutPopupOverlay);
             closePopup(learnerStatsPopupOverlay);
@@ -450,7 +485,7 @@ if (darkModeToggle) {
 
 if (markdownToggle) {
     markdownToggle.addEventListener('change', function() {
-        localStorage.setItem(MARKDOWN_ENABLED_KEY, this.checked);
+        localStorage.setItem(MARKDOWN_ENABLED_KEY, this.checked.toString()); // Store as string "true" or "false"
     });
 }
 
@@ -472,6 +507,7 @@ function loadOllamaSettings() {
             }
         }
         ollamaTemperatureInput.value = tempToSet.toFixed(1);
+        // Save it back to ensure it's stored consistently, e.g. if it was null before
         localStorage.setItem(OLLAMA_TEMPERATURE_KEY, tempToSet.toFixed(1));
     }
 }
@@ -487,18 +523,17 @@ if (ollamaModelInput) {
     ollamaModelInput.addEventListener('input', () => saveOllamaSetting(OLLAMA_MODEL_KEY, ollamaModelInput.value));
 }
 if (ollamaTemperatureInput) {
-    ollamaTemperatureInput.addEventListener('input', () => { // Handle comma replacement on input
+    ollamaTemperatureInput.addEventListener('input', () => { 
         if (ollamaTemperatureInput.value.includes(',')) {
             ollamaTemperatureInput.value = ollamaTemperatureInput.value.replace(',', '.');
         }
     });
     ollamaTemperatureInput.addEventListener('change', () => {
-        // The 'input' event should have already replaced comma with dot
         let tempValue = parseFloat(ollamaTemperatureInput.value);
         if (isNaN(tempValue) || tempValue < 0.1) tempValue = 0.1;
         else if (tempValue > 1.0) tempValue = 1.0;
 
-        ollamaTemperatureInput.value = tempValue.toFixed(1); // Ensures display with dot
+        ollamaTemperatureInput.value = tempValue.toFixed(1); 
         saveOllamaSetting(OLLAMA_TEMPERATURE_KEY, tempValue.toFixed(1));
     });
 }
@@ -517,7 +552,7 @@ async function _performOllamaReachabilityTest() {
     let ollamaBaseUrlToTest;
     try {
         const parsedUrl = new URL(endpointUrlFromInput);
-        ollamaBaseUrlToTest = parsedUrl.origin;
+        ollamaBaseUrlToTest = parsedUrl.origin; // Test base URL (e.g. http://localhost:11434)
     } catch (e) {
         console.warn("Invalid Ollama endpoint URL:", endpointUrlFromInput, e);
         return { reachable: false, errorType: 'invalid_url' };
@@ -525,24 +560,27 @@ async function _performOllamaReachabilityTest() {
 
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
+        // Fetch the base URL, not the /api/generate endpoint for a general check
         const response = await fetch(ollamaBaseUrlToTest, { method: 'GET', mode: 'cors', signal: controller.signal });
         clearTimeout(timeoutId);
 
         if (response.ok) {
-            const responseText = await response.text();
+            const responseText = await response.text(); // Ollama base URL usually returns "Ollama is running"
             if (responseText.toLowerCase().includes("ollama is running")) {
                return { reachable: true, status: 'running' };
             } else {
-               return { reachable: true, status: 'ok_unexpected_content' };
+               // It's reachable but doesn't say "Ollama is running". Still, server is up.
+               return { reachable: true, status: 'ok_unexpected_content' }; 
             }
         } else {
             return { reachable: false, errorType: 'http_error', statusCode: response.status };
         }
     } catch (error) {
         console.warn('Ollama reachability test failed:', error);
-         return { reachable: false, errorType: 'fetch_error', errorName: error.name };
+         // Differentiate network errors (fetch_error) from aborts (timeout)
+         return { reachable: false, errorType: error.name === 'AbortError' ? 'timeout' : 'fetch_error', errorName: error.name };
     }
 }
 
@@ -559,7 +597,7 @@ if (checkOllamaStatusBtn && ollamaStatusText) {
         if (result.reachable) {
             if (result.status === 'running') {
                 setOllamaStatusPanelText('ollamaStatusRunning', {}, 'success');
-            } else {
+            } else { // 'ok_unexpected_content'
                 setOllamaStatusPanelText('ollamaStatusOKUnexpected', {}, 'success');
             }
         } else {
@@ -567,36 +605,37 @@ if (checkOllamaStatusBtn && ollamaStatusText) {
                 setOllamaStatusPanelText('ollamaStatusInvalidURL', {}, 'error');
             } else if (result.errorType === 'http_error') {
                  setOllamaStatusPanelText('ollamaStatusReachableWithCode', { status: result.statusCode }, 'error');
-            } else {
+            } else { // 'fetch_error', 'timeout', or other
                 setOllamaStatusPanelText('ollamaStatusNotReachable', {}, 'error');
             }
         }
-        isOllamaReachableForHeader = result.reachable;
+        isOllamaReachableForHeader = result.reachable; // Update header status based on this check
         updateAgentHeaderStatus();
 
         isCheckingOllama = false;
         checkOllamaStatusBtn.disabled = false;
-        startPeriodicOllamaHeaderCheck();
+        startPeriodicOllamaHeaderCheck(); // Restart periodic check
         setTimeout(() => {
-            if (ollamaStatusText.dataset.key && settingsPanel.classList.contains('is-open')) { // Only clear if panel is still open
-                setOllamaStatusPanelText('', {}, '');
+            // Clear status text only if panel is still open and the same status is shown
+            if (ollamaStatusText.dataset.key && settingsPanel.classList.contains('is-open')) { 
+                setOllamaStatusPanelText('', {}, ''); // Clear by setting to empty
             }
-        }, 5000);
+        }, 5000); // Clear after 5 seconds
     });
 }
 
 async function checkOllamaForHeaderUpdate() {
-    if (isAiResponding || isCheckingOllama || isTutoringActive) return;
+    if (isAiResponding || isCheckingOllama || isTutoringActive) return; // Don't check if busy
 
     const result = await _performOllamaReachabilityTest();
     isOllamaReachableForHeader = result.reachable;
-    if (!isAiResponding) {
+    if (!isAiResponding) { // Only update header if AI is not currently "typing"
          updateAgentHeaderStatus();
     }
 }
 
 function startPeriodicOllamaHeaderCheck() {
-    if (ollamaHeaderCheckIntervalId) clearInterval(ollamaHeaderCheckIntervalId);
+    if (ollamaHeaderCheckIntervalId) clearInterval(ollamaHeaderCheckIntervalId); // Clear existing if any
     ollamaHeaderCheckIntervalId = setInterval(checkOllamaForHeaderUpdate, OLLAMA_CHECK_INTERVAL);
 }
 
@@ -626,6 +665,7 @@ async function resizeImage(originalDataUri, maxWidth, maxHeight, quality = 0.9, 
                     height = maxHeight;
                 }
             }
+            // Ensure dimensions are at least 1px to avoid canvas errors
             width = Math.max(1, width);
             height = Math.max(1, height);
 
@@ -654,12 +694,12 @@ function clearSelectedImageState() {
     currentResizedPreviewDataUri = null;
     if(imagePreview) imagePreview.src = '#';
     if(imagePreviewContainer) imagePreviewContainer.style.display = 'none';
-    if (imageUpload) imageUpload.value = '';
+    if (imageUpload) imageUpload.value = ''; // Reset file input
 }
 
 if (attachFileBtn && imageUpload && imagePreviewContainer && imagePreview && removeImageBtn) {
     attachFileBtn.addEventListener('click', () => {
-        if (isTutoringActive) return;
+        if (isTutoringActive) return; // Disable image upload during tutoring
         imageUpload.click();
     });
 
@@ -669,15 +709,19 @@ if (attachFileBtn && imageUpload && imagePreviewContainer && imagePreview && rem
             const reader = new FileReader();
             reader.onload = async (e) => {
                 currentOriginalImageBase64DataUri = e.target.result;
-                imagePreview.src = currentOriginalImageBase64DataUri;
+                imagePreview.src = currentOriginalImageBase64DataUri; // Show original initially for speed
                 imagePreviewContainer.style.display = 'block';
-                currentResizedPreviewDataUri = null;
+                currentResizedPreviewDataUri = null; // Reset
 
                 try {
+                    // Generate and store the smaller preview for chat history
                     currentResizedPreviewDataUri = await generateResizedPreview(currentOriginalImageBase64DataUri);
+                    // Optionally, update imagePreview.src to the resized one if you want the preview box to show the exact data that will be stored for history display
+                    // imagePreview.src = currentResizedPreviewDataUri; 
                 } catch (error) {
                     console.error("Error generating resized preview for history:", error);
-                    currentResizedPreviewDataUri = currentOriginalImageBase64DataUri;
+                    // Fallback: use original if resizing fails, though it might be large for history
+                    currentResizedPreviewDataUri = currentOriginalImageBase64DataUri; 
                 }
             }
             reader.readAsDataURL(file);
@@ -730,12 +774,27 @@ function addDateSeparator(timestamp) {
 
 function formatAiMessageContent(text) {
     const useMarkdown = markdownToggle ? markdownToggle.checked : true;
+    // console.log("[MarkdownDebug] Formatting AI message. Text:", text.substring(0, 50) + "...", "useMarkdown:", useMarkdown, "marked defined:", typeof marked !== 'undefined', "MarkdownToggle checked:", markdownToggle ? markdownToggle.checked : "N/A");
+
     if (useMarkdown && typeof marked !== 'undefined') {
-        return marked.parse(text, { breaks: true, gfm: true });
+        try {
+            const parsed = marked.parse(text, { breaks: true, gfm: true });
+            // console.log("[MarkdownDebug] Parsed with marked:", parsed.substring(0,100) + "...");
+            return parsed;
+        } catch (e) {
+            console.error("[MarkdownDebug] Error in marked.parse:", e);
+            // Fallback to plain text on error
+            const tempDiv = document.createElement('div');
+            tempDiv.textContent = text;
+            return tempDiv.innerHTML.replace(/\n/g, '<br>');
+        }
     } else {
+        // console.log("[MarkdownDebug] Using plain text rendering.");
         const tempDiv = document.createElement('div');
-        tempDiv.textContent = text;
-        return tempDiv.innerHTML.replace(/\n/g, '<br>');
+        tempDiv.textContent = text; // This correctly escapes HTML entities if any are in 'text'
+        const plainRender = tempDiv.innerHTML.replace(/\n/g, '<br>'); // Then convert newlines
+        // console.log("[MarkdownDebug] Plain text render:", plainRender.substring(0,100) + "...");
+        return plainRender;
     }
 }
 
@@ -743,7 +802,7 @@ function renderMessageToDOM(messageData, isStreamingPlaceholder = false) {
     addDateSeparator(messageData.timestamp);
 
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', messageData.type);
+    messageDiv.classList.add('message', messageData.type); // e.g. 'user', 'ai', 'tutor'
 
     const contentDiv = document.createElement('div');
     contentDiv.classList.add('message-content');
@@ -753,13 +812,13 @@ function renderMessageToDOM(messageData, isStreamingPlaceholder = false) {
     if (messageData.type === 'ai' || messageData.type === 'tutor') {
         contentDiv.innerHTML = formatAiMessageContent(displayText.trim());
     } else if (messageData.type === 'user') {
-        if (messageData.imageBase64) {
+        if (messageData.imageBase64) { // Image data for display in chat
             const imgPreviewElement = document.createElement('img');
-            imgPreviewElement.src = messageData.imageBase64;
+            imgPreviewElement.src = messageData.imageBase64; 
             imgPreviewElement.alt = getTranslation('userImagePreviewAlt');
             imgPreviewElement.classList.add('message-image-preview');
             contentDiv.appendChild(imgPreviewElement);
-        } else if (messageData.hasImage) {
+        } else if (messageData.hasImage) { // Fallback if no base64, but we know there was an image
             const svgIconNS = "http://www.w3.org/2000/svg";
             const svgIcon = document.createElementNS(svgIconNS, "svg");
             svgIcon.setAttribute("viewBox", "0 0 24 24");
@@ -770,18 +829,18 @@ function renderMessageToDOM(messageData, isStreamingPlaceholder = false) {
             contentDiv.appendChild(svgIcon);
         }
 
-        if (displayText.trim()) {
-            const textNode = document.createTextNode(displayText);
+        if (displayText.trim()) { // Add text if present
+            const textNode = document.createTextNode(displayText); // Ensures text is treated as text
             contentDiv.appendChild(textNode);
         }
-    } else {
+    } else { // Other message types (e.g., system, though usually handled by displaySystemMessage)
         contentDiv.textContent = displayText;
     }
     messageDiv.appendChild(contentDiv);
 
     const timeDiv = document.createElement('div');
     timeDiv.classList.add('message-time');
-    if (!isStreamingPlaceholder) {
+    if (!isStreamingPlaceholder) { // Don't show time for empty streaming placeholder
         timeDiv.textContent = new Date(messageData.timestamp).toLocaleTimeString(currentLanguage, { hour: 'numeric', minute: '2-digit' });
     }
     messageDiv.appendChild(timeDiv);
@@ -798,27 +857,36 @@ function saveMessageToHistory(messageData) {
         localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history));
     } catch (e) {
         console.error("Error saving history to localStorage (likely full):", e);
-        displaySystemMessage("Error saving history: Storage might be full.");
+        displaySystemMessage("Error saving history: Storage might be full."); // TODO: Translate this
     }
 }
 
 function addNewMessage(text, type, hasImage = false, imageBase64ForHistory = null) {
-    if (type !== 'ai' && type !== 'tutor' && (!text || (typeof text === 'string' && !text.trim())) && !hasImage ) {
-         return null;
+    // Allow empty text if there's an image for user messages
+    if (type !== 'user' && (!text || (typeof text === 'string' && !text.trim())) ) {
+         if (!hasImage) return null; // For non-user, text is required or image is not relevant
     }
+    if (type === 'user' && !text.trim() && !hasImage) { // User message must have text or image
+        return null;
+    }
+
 
     const messageData = {
         text: text,
         type: type,
         hasImage: hasImage,
-        imageBase64: imageBase64ForHistory,
+        // imageBase64 is the one for *displaying in history*. For 'user' messages, this is currentResizedPreviewDataUri.
+        // For AI messages, it's typically null unless the AI itself sends an image (not current feature).
+        imageBase64: imageBase64ForHistory, 
         timestamp: Date.now()
     };
 
+    // A placeholder AI message is one that's created visually but doesn't have text content yet because it will be streamed.
     const isPlaceholder = (type === 'ai' && !text && (streamResponsesToggle ? streamResponsesToggle.checked : true));
 
     const messageElement = renderMessageToDOM(messageData, isPlaceholder);
 
+    // Save to history unless it's a placeholder AI message (which will be saved when complete)
     if (type === 'user' || type === 'tutor' || (type === 'ai' && !isPlaceholder)) {
         saveMessageToHistory(messageData);
     }
@@ -829,38 +897,45 @@ function addNewMessage(text, type, hasImage = false, imageBase64ForHistory = nul
 
 async function loadChatHistory() {
     if (!chatMessagesContainer) return;
-    chatMessagesContainer.innerHTML = '';
-    lastMessageDateString = '';
+    chatMessagesContainer.innerHTML = ''; // Clear existing messages
+    lastMessageDateString = ''; // Reset date separator tracking
 
     let historyActuallyLoaded = false;
     let systemMessageAlreadyShownAboutLoading = false;
 
+    // Attempt to load from chat_history.json first (if it exists)
     try {
-        const response = await fetch('chat_history.json', { cache: "no-store" });
+        const response = await fetch('chat_history.json', { cache: "no-store" }); // Disable cache for this
         if (response.ok) {
             const historyFromFile = await response.json();
             if (Array.isArray(historyFromFile) && historyFromFile.length > 0) {
                 historyFromFile.forEach(msgData => {
+                    // Ensure necessary fields, providing defaults if absent from old history formats
                     msgData.hasImage = msgData.hasImage || false;
-                    msgData.imageBase64 = msgData.imageBase64 || null;
+                    msgData.imageBase64 = msgData.imageBase64 || null; // This is for displaying in chat
                     renderMessageToDOM(msgData);
                 });
                 historyActuallyLoaded = true;
+                // Overwrite localStorage with this history if loaded from file
                 localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(historyFromFile));
-                displaySystemMessage("systemMsgLoadedFromFile"); // Uses getTranslation
+                displaySystemMessage("systemMsgLoadedFromFile");
                 systemMessageAlreadyShownAboutLoading = true;
             } else if (Array.isArray(historyFromFile) && historyFromFile.length === 0) {
                 console.info("chat_history.json is empty. Will try localStorage.");
+                // If file is empty, clear localStorage too to sync states
+                localStorage.removeItem(CHAT_HISTORY_KEY);
             } else {
                 console.warn("chat_history.json is not a valid history array. Will try localStorage.");
             }
-        } else if (response.status !== 404) {
+        } else if (response.status !== 404) { // Log errors other than "not found"
             console.warn(`Error loading chat_history.json (status: ${response.status}). Will try localStorage.`);
         }
     } catch (error) {
+        // This usually means chat_history.json doesn't exist or network error
         console.info("Could not load chat_history.json (likely not present). Will try localStorage:", error.message);
     }
 
+    // If not loaded from file, try localStorage
     if (!historyActuallyLoaded) {
         const historyFromStorageJson = localStorage.getItem(CHAT_HISTORY_KEY);
         if (historyFromStorageJson) {
@@ -874,7 +949,7 @@ async function loadChatHistory() {
                     });
                     historyActuallyLoaded = true;
                     if (!systemMessageAlreadyShownAboutLoading) {
-                        displaySystemMessage("systemMsgLoadedFromStorage"); // Uses getTranslation
+                        displaySystemMessage("systemMsgLoadedFromStorage");
                         systemMessageAlreadyShownAboutLoading = true;
                     }
                 } else {
@@ -882,13 +957,13 @@ async function loadChatHistory() {
                 }
             } catch (e) {
                 console.error("Error parsing history from local storage. Clearing it.", e);
-                localStorage.removeItem(CHAT_HISTORY_KEY);
+                localStorage.removeItem(CHAT_HISTORY_KEY); // Clear corrupted history
             }
         }
     }
 
     if (!historyActuallyLoaded && !systemMessageAlreadyShownAboutLoading) {
-         displaySystemMessage("systemMsgNoHistory"); // Uses getTranslation
+         displaySystemMessage("systemMsgNoHistory");
     }
 
     scrollToBottom();
@@ -897,16 +972,17 @@ async function loadChatHistory() {
 if (clearChatHistoryBtn) {
     clearChatHistoryBtn.addEventListener('click', () => {
         if (isTutoringActive) {
-            alert("Please exit tutoring mode before clearing chat history."); // Consider translating this too if needed
+            // TODO: Translate this alert if needed, or use a custom modal
+            alert(getTranslation("clearHistoryFailTutoringActive", {})); 
             return;
         }
         if (confirm(getTranslation('confirmClearHistory'))) {
             localStorage.removeItem(CHAT_HISTORY_KEY);
-            if(chatMessagesContainer) chatMessagesContainer.innerHTML = '';
-            lastMessageDateString = '';
-            displaySystemMessage("systemMsgHistoryCleared");
+            if(chatMessagesContainer) chatMessagesContainer.innerHTML = ''; // Clear UI
+            lastMessageDateString = ''; // Reset date separator
+            displaySystemMessage("systemMsgHistoryCleared"); // Confirmation message
             if (settingsPanel && settingsPanel.classList.contains('is-open')) {
-                settingsPanel.classList.remove('is-open');
+                settingsPanel.classList.remove('is-open'); // Close settings panel
             }
         }
     });
@@ -917,18 +993,21 @@ function getChatHistoryForPrompt() {
     const historyJson = localStorage.getItem(CHAT_HISTORY_KEY);
     const history = historyJson ? JSON.parse(historyJson) : [];
 
+    // Filter for user, AI, and tutor messages to build context
     const recentMessages = history
         .filter(msg => msg.type === 'user' || msg.type === 'ai' || msg.type === 'tutor')
         .slice(-MAX_HISTORY_FOR_PROMPT);
 
     const userLabel = getTranslation('ollamaPromptUserLabel');
-    const aiLabel = getTranslation('ollamaPromptAiLabel');
+    const aiLabel = getTranslation('ollamaPromptAiLabel'); // Tutor messages will also use AI label in prompt
 
     return recentMessages.map(msg => {
-        const prefix = msg.type === 'user' ? userLabel : aiLabel;
+        const prefix = (msg.type === 'user') ? userLabel : aiLabel;
         let messageContent = msg.text || "";
+        // If user message has image but no text, represent image in prompt
         if (msg.type === 'user' && msg.hasImage && !msg.text.trim()) {
-            messageContent = `[${getTranslation('userImagePreviewAlt')}]`;
+            // Use a generic placeholder for the image in the text prompt
+            messageContent = `[${getTranslation('userImageContextInPrompt', {altText: getTranslation('userImagePreviewAlt')})}]`;
         }
         return `${prefix}: ${messageContent}`;
     }).join('\n');
@@ -939,18 +1018,20 @@ function constructOllamaPrompt(userInput, chatHistoryString, currentMessageHasIm
     const userLabel = getTranslation('ollamaPromptUserLabel');
     const aiLabel = getTranslation('ollamaPromptAiLabel');
 
-    let fullPrompt = `${systemPrompt}\n\n`;
+    let fullPrompt = `${systemPrompt}\n\n`; // Start with system prompt
     if (chatHistoryString) {
         fullPrompt += `Previous conversation:\n${chatHistoryString}\n\n`;
     }
 
+    // Construct current user input line
     let currentUserInputLine = `${userLabel}: `;
     if (currentMessageHasImage) {
-        currentUserInputLine += `[Image Provided] `;
+        // Add a generic placeholder if an image is part of the current message
+        currentUserInputLine += `[${getTranslation('userImageContextInPrompt', {altText: getTranslation('userImagePreviewAlt')})}] `;
     }
-    currentUserInputLine += (userInput || "");
+    currentUserInputLine += (userInput || ""); // Add user text if any
 
-    fullPrompt += `${currentUserInputLine}\n${aiLabel}:`;
+    fullPrompt += `${currentUserInputLine}\n${aiLabel}:`; // Append current input and prompt AI for response
     return fullPrompt;
 }
 
@@ -961,7 +1042,7 @@ async function callOllamaApi(promptText, onTokenCallback, imageBase64Payload = n
 
     let temperatureValue = DEFAULT_OLLAMA_TEMPERATURE;
     if (ollamaTemperatureInput) {
-        const parsedTemp = parseFloat(ollamaTemperatureInput.value); // Value is already dot-separated
+        const parsedTemp = parseFloat(ollamaTemperatureInput.value);
         if (!isNaN(parsedTemp) && parsedTemp >= 0.1 && parsedTemp <= 1.0) {
             temperatureValue = parsedTemp;
         }
@@ -976,8 +1057,8 @@ async function callOllamaApi(promptText, onTokenCallback, imageBase64Payload = n
         }
     };
 
-    if (imageBase64Payload) {
-        requestPayload.images = [imageBase64Payload];
+    if (imageBase64Payload) { // Ollama expects images as an array of base64 strings
+        requestPayload.images = [imageBase64Payload]; // Ensure it's just the base64 part
     }
 
     try {
@@ -998,65 +1079,68 @@ async function callOllamaApi(promptText, onTokenCallback, imageBase64Payload = n
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
 
+            // Read the stream
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n').filter(line => line.trim() !== '');
+                const chunk = decoder.decode(value, { stream: true }); // Process chunk
+                const lines = chunk.split('\n').filter(line => line.trim() !== ''); // Split into lines
                 for (const line of lines) {
                     try {
                         const jsonResponse = JSON.parse(line);
-                        if (jsonResponse.response) {
+                        if (jsonResponse.response) { // Ollama streams token in 'response'
                             onTokenCallback(jsonResponse.response);
                         }
-                        if (jsonResponse.done) {
-                            return;
+                        if (jsonResponse.done) { // Check if stream is done
+                            return; // Exit loop
                         }
                     } catch (e) {
                         console.warn("Error parsing streamed JSON line:", line, e);
+                        // Potentially handle partial JSON if necessary, or just log and continue
                     }
                 }
             }
-            return;
-        } else {
+            return; // Streaming finished
+        } else { // Not streaming or no response.body
             const data = await response.json();
-            return data.response;
+            return data.response; // Return full response if not streamed
         }
     } catch (error) {
         console.error("Error calling Ollama API:", error);
-        isOllamaReachableForHeader = false;
+        isOllamaReachableForHeader = false; // Assume not reachable on error
         updateAgentHeaderStatus();
-        throw error;
+        throw error; // Re-throw to be caught by caller
     }
 }
 
 function createVisualAiMessage() {
-    const timestamp = Date.now();
+    const timestamp = Date.now(); // Timestamp for when streaming starts
     addDateSeparator(timestamp);
 
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', 'ai');
+    messageDiv.classList.add('message', 'ai'); // AI message styling
 
     const contentDiv = document.createElement('div');
     contentDiv.classList.add('message-content');
-    contentDiv.innerHTML = '';
+    contentDiv.innerHTML = ''; // Start with empty content
     messageDiv.appendChild(contentDiv);
 
     const timeDiv = document.createElement('div');
     timeDiv.classList.add('message-time');
+    // Time will be added once streaming is complete
     messageDiv.appendChild(timeDiv);
 
     if(chatMessagesContainer) chatMessagesContainer.appendChild(messageDiv);
     scrollToBottom();
-    return messageDiv;
+    return messageDiv; // Return the created message element
 }
 
 // --- TUTORING FEATURE IMPLEMENTATION ---
 
 function getDefaultUserState() {
     return {
-        version: "1.1", // Keep version consistent
+        version: "1.1", 
         user_preferences: {
             default_input_lang: null,
             default_output_lang: KNOWN_LANG,
@@ -1067,10 +1151,10 @@ function getDefaultUserState() {
         language_proficiency: {},
         learning_focus: {},
         lesson_history_summary: [],
-        current_lesson_data: {
+        current_lesson_data: { // Store details about an ongoing lesson for potential resume (not fully implemented yet) or analysis
             input_lang: null,
             output_lang: null,
-            interactions: []
+            interactions: [] // individual Q&As within a lesson
         }
     };
 }
@@ -1080,11 +1164,13 @@ function loadUserState() {
     if (storedState) {
         try {
             user_state = JSON.parse(storedState);
+            // Version check for future migrations
             if (!user_state.version || user_state.version !== "1.1") {
                 console.warn("User state version mismatch or missing. Resetting to default.");
                 user_state = getDefaultUserState();
-                saveUserState();
+                saveUserState(); // Save the new default state
             }
+            // Ensure current_lesson_data is reset if a lesson wasn't properly concluded
             if (user_state.current_lesson_data && user_state.current_lesson_data.input_lang) {
                 console.log("Found incomplete lesson data from previous session. Clearing it.");
                 user_state.current_lesson_data = { input_lang: null, output_lang: null, interactions: [] };
@@ -1094,36 +1180,40 @@ function loadUserState() {
         } catch (e) {
             console.error("Error parsing user_state from localStorage. Resetting to default.", e);
             user_state = getDefaultUserState();
-            saveUserState();
+            saveUserState(); // Save the new default state
         }
     } else {
         user_state = getDefaultUserState();
+        // No need to save here, will be saved upon first modification or lesson start
     }
-    updateStudyButtonText();
+    updateStudyButtonText(); // Update button based on loaded/default state
 }
 
 function saveUserState() {
     if (user_state) {
         try {
-            if (!isTutoringActive && user_state.current_lesson_data && !user_state.current_lesson_data.input_lang) {
+            // If tutoring is not active, ensure current_lesson_data is cleared before saving
+            // This prevents saving mid-lesson state if tutoring is exited unexpectedly
+            if (!isTutoringActive && user_state.current_lesson_data && user_state.current_lesson_data.input_lang) {
                  user_state.current_lesson_data = { input_lang: null, output_lang: null, interactions: [] };
-            } else if (isTutoringActive && user_state.current_lesson_data) {
-                // Current lesson data is actively being managed
             }
             localStorage.setItem(USER_STATE_KEY, JSON.stringify(user_state));
         } catch (e) {
             console.error("Error saving user_state to localStorage:", e);
+            // Potentially notify user if storage is full
         }
     }
 }
 
 function updateStudyButtonText() {
-    let buttonTextKey = 'studySessionBtn';
+    let buttonTextKey = 'studySessionBtn'; // Default: "Start Study Session"
     let replacements = {};
     if (isTutoringActive && currentLessonConfig.learn_lang) {
+         // If tutoring is active and learn_lang is set, show "Study: [language]"
          buttonTextKey = 'studySessionBtnContinue';
          replacements = { learn_lang: currentLessonConfig.learn_lang };
     } else if (user_state && user_state.user_preferences && user_state.user_preferences.last_learn_lang) {
+        // If not active, but there was a last language, also show "Study: [language]"
         buttonTextKey = 'studySessionBtnContinue';
         replacements = { learn_lang: user_state.user_preferences.last_learn_lang };
     }
@@ -1139,50 +1229,55 @@ function disableChatInputForTutor(placeholderKey = 'tutorChatInputPlaceholder', 
         chatInput.placeholder = getTranslation(placeholderKey, replacements);
     }
     if (sendButton) sendButton.disabled = true;
-    if (attachFileBtn) attachFileBtn.disabled = true;
+    if (attachFileBtn) attachFileBtn.disabled = true; // Also disable attach file during tutoring
 }
 function enableChatInputAfterTutor(isStillTutoring = false) {
     if (chatInput) {
         chatInput.disabled = false;
         if (isStillTutoring) {
-            // Placeholder might be set by specific tutor step, or default tutor placeholder
-            if (!chatInput.placeholder.startsWith(getTranslation('tutorChatInputTranslationPlaceholder', {output_lang: ''}).substring(0,10))) {
+            // If still tutoring, placeholder might be specific (e.g., "translate to X") or general tutor input
+            // The specific tutor step (e.g., startTranslationExerciseCycle) will set the more specific placeholder.
+            // Otherwise, fall back to the general tutor placeholder.
+            if (!chatInput.placeholder.startsWith(getTranslation('tutorChatInputTranslationPlaceholder', {output_lang: ''}).substring(0,10))) { // Avoid overwriting specific translation placeholder
                  chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
             }
         } else {
-            chatInput.placeholder = getTranslation('chatInputPlaceholder');
+            chatInput.placeholder = getTranslation('chatInputPlaceholder'); // General chat placeholder
         }
     }
     if (sendButton) sendButton.disabled = false;
-    if (attachFileBtn) attachFileBtn.disabled = false;
+    if (attachFileBtn) attachFileBtn.disabled = false; // Re-enable attach file if not tutoring
 }
 
 function displayTutorMessage(textOrKey, type = 'tutor', replacements = {}) {
+    // Check if textOrKey is a key in translations, otherwise use it as literal text
     const messageText = translations[currentLanguage]?.[textOrKey] ? getTranslation(textOrKey, replacements) : textOrKey;
-    addNewMessage(messageText, type);
+    addNewMessage(messageText, type); // 'tutor' type messages are styled like 'ai'
 }
 
 async function callTutorOllamaApi(promptBlueprintObject) {
     const endpoint = (ollamaEndpointInput ? ollamaEndpointInput.value : null) || 'http://localhost:11434/api/generate';
-    const model = (ollamaModelInput ? ollamaModelInput.value : null) || 'gemma3:4b';
+    const model = (ollamaModelInput ? ollamaModelInput.value : null) || 'gemma3:4b'; // Consider a specific model for tutoring if needed
 
+    // System prompt for the tutor model
     const ollamaSystemPrompt = `You are an AI language tutor state machine. You will receive a JSON object describing the current context and user input. Your task is to analyze this input and return a JSON object in the specified 'desired_output_format'. Do NOT add any explanatory text outside the JSON response.`;
 
+    // User prompt containing the JSON blueprint
     const ollamaUserPrompt = `Current task and state:\n\`\`\`json\n${JSON.stringify(promptBlueprintObject, null, 2)}\n\`\`\`\nPlease provide your response strictly in the 'desired_output_format' JSON structure.`;
 
     const requestPayload = {
         model: model,
         prompt: ollamaUserPrompt,
-        system: ollamaSystemPrompt,
-        stream: false,
-        format: "json",
+        system: ollamaSystemPrompt, // Add the system prompt
+        stream: false, // Tutor interactions are expected to be single JSON responses
+        format: "json", // Request JSON output from Ollama
         options: {
-            temperature: 0.5
+            temperature: 0.5 // Moderate temperature for structured output
         }
     };
 
     isTutorResponding = true;
-    disableChatInputForTutor();
+    disableChatInputForTutor('tutorThinkingPlaceholder'); // Use a "thinking" placeholder
 
     try {
         const response = await fetch(endpoint, {
@@ -1192,12 +1287,13 @@ async function callTutorOllamaApi(promptBlueprintObject) {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
+            const errorText = await response.text(); // Get more error details
             throw new Error(`Tutor Ollama API Error: ${response.status} - ${errorText}`);
         }
-        const data = await response.json();
+        const data = await response.json(); // Ollama with format:"json" should return JSON in `response`
 
         let jsonData;
+        // Ollama's JSON mode might put the JSON string inside `data.response` or directly in `data.message.content`
         if (typeof data.response === 'string') {
             try {
                 jsonData = JSON.parse(data.response);
@@ -1205,9 +1301,9 @@ async function callTutorOllamaApi(promptBlueprintObject) {
                  console.error("Failed to parse JSON from Ollama tutor response string:", data.response, e);
                  throw new Error("Tutor model did not return valid JSON in response string.");
             }
-        } else if (typeof data.response === 'object') {
+        } else if (typeof data.response === 'object') { // Already an object (less common for ollama /generate)
             jsonData = data.response;
-        } else if (data.message && data.message.content && typeof data.message.content === 'string') {
+        } else if (data.message && data.message.content && typeof data.message.content === 'string') { // Check newer Ollama format
              try {
                 jsonData = JSON.parse(data.message.content);
             } catch (e) {
@@ -1223,15 +1319,16 @@ async function callTutorOllamaApi(promptBlueprintObject) {
 
     } catch (error) {
         console.error("Error calling Tutor Ollama API:", error);
-        displayTutorMessage('tutorErrorGeneral');
-        throw error;
+        displayTutorMessage('tutorErrorGeneral'); // Generic error message to user
+        throw error; // Re-throw for higher-level handling (e.g., exit tutoring)
     } finally {
         isTutorResponding = false;
+        // Input will be re-enabled by the calling function if appropriate
     }
 }
 
 async function handleInitialTutorInteraction(userInputText) {
-    expectedTutorResponseHandler = null;
+    expectedTutorResponseHandler = null; // Clear handler for this step
     let promptBlueprint;
 
     const lastLearnLang = user_state.user_preferences.last_learn_lang;
@@ -1247,8 +1344,8 @@ async function handleInitialTutorInteraction(userInputText) {
         },
         user_current_response: userInputText,
         known_lang: KNOWN_LANG,
-        current_user_state_summary: {
-            language_proficiency: user_state.language_proficiency
+        current_user_state_summary: { // Provide some summary for context if available
+            language_proficiency: user_state.language_proficiency 
         },
         desired_output_format: {
             description: "Return a JSON object indicating the user's intention and any specified languages. 'intention' can be 'continue_previous', 'new_lesson_specified', 'choose_new_language', 'choose_new_direction', 'unclear'. If 'new_lesson_specified', fill in 'learn_lang', 'input_lang', 'output_lang'. If only language is new, fill 'learn_lang'. If only direction is new, set 'intention' to 'choose_new_direction' and 'learn_lang' to last_learn_lang.",
@@ -1256,6 +1353,7 @@ async function handleInitialTutorInteraction(userInputText) {
         }
     };
 
+    // Replace placeholders in system instruction
     promptBlueprint.system_instruction = promptBlueprint.system_instruction
         .replace('{last_learn_lang}', lastLearnLang || 'N/A')
         .replace('{last_input_lang}', lastInputLang || 'N/A')
@@ -1276,7 +1374,8 @@ async function handleInitialTutorInteraction(userInputText) {
                 currentLessonConfig.output_lang = llmResponse.output_lang.toLowerCase();
                 await prepareLessonCore();
             } else {
-                displayTutorMessage('tutorAskLanguageDirection');
+                // If intention is unclear or needs more info (e.g., 'choose_new_language')
+                displayTutorMessage('tutorAskLanguageDirection'); // Ask generally
                 expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
                 enableChatInputAfterTutor(true);
                 chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
@@ -1285,8 +1384,9 @@ async function handleInitialTutorInteraction(userInputText) {
             throw new Error("Invalid LLM response structure for initial interaction.");
         }
     } catch (error) {
-        displayTutorMessage('tutorErrorOllamaResponse');
-        exitTutoringMode();
+        displayTutorMessage('tutorErrorOllamaResponse'); // Inform user
+        // Fallback: ask generally again or exit
+        exitTutoringMode(); // Or retry by setting expectedTutorResponseHandler
     }
 }
 
@@ -1296,9 +1396,9 @@ async function handleGeneralLanguageDirectionSetup(userInputText) {
         system_instruction: "You are an AI assistant helping a user set up a language lesson. Their known/primary language is '{known_lang}'. Analyze their response to identify: 1. The language they want to learn/practice ('learn_lang'). 2. The source language for translation ('input_lang'). 3. The target language for translation ('output_lang'). One of input/output should be 'learn_lang'. The other is often '{known_lang}' unless specified otherwise.",
         user_current_response: userInputText,
         known_lang: KNOWN_LANG,
-        current_user_state_summary: {
+        current_user_state_summary: { // Include user state for better suggestions
             language_proficiency: user_state.language_proficiency,
-            user_preferences: user_state.user_preferences
+            user_preferences: user_state.user_preferences 
         },
         desired_output_format: {
             description: "Return a JSON object with 'learn_lang', 'input_lang', and 'output_lang'. Ensure language names are lowercase English (e.g., 'spanish'). If any part is unclear, set the respective field(s) to null.",
@@ -1314,9 +1414,10 @@ async function handleGeneralLanguageDirectionSetup(userInputText) {
             currentLessonConfig.input_lang = llmResponse.input_lang.toLowerCase();
             currentLessonConfig.output_lang = llmResponse.output_lang.toLowerCase();
 
+            // Validation: learn_lang must be one of input/output, and they can't be same
             const langs = [currentLessonConfig.input_lang, currentLessonConfig.output_lang];
             if (!langs.includes(currentLessonConfig.learn_lang)) {
-                 throw new Error("Learn language not in input/output pair.");
+                 throw new Error("Learn language is not part of the input/output pair.");
             }
             if (currentLessonConfig.input_lang === currentLessonConfig.output_lang) {
                 throw new Error("Input and output languages cannot be the same.");
@@ -1324,21 +1425,23 @@ async function handleGeneralLanguageDirectionSetup(userInputText) {
 
             await prepareLessonCore();
         } else if (llmResponse && llmResponse.learn_lang && (!llmResponse.input_lang || !llmResponse.output_lang)) {
+            // If learn_lang is identified but direction is missing
             currentLessonConfig.learn_lang = llmResponse.learn_lang.toLowerCase();
             displayTutorMessage('tutorAskDirectionClarification', 'tutor', { learn_lang: currentLessonConfig.learn_lang, known_lang: KNOWN_LANG });
             expectedTutorResponseHandler = handleDirectionClarification;
             enableChatInputAfterTutor(true);
             chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
         }
-        else {
-            displayTutorMessage('tutorUnclearIntent');
-            expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
+        else { // Unclear response from LLM
+            displayTutorMessage('tutorUnclearIntent'); // Ask user to rephrase
+            expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup; // Retry this step
             enableChatInputAfterTutor(true);
             chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
         }
     } catch (error) {
          console.error("Error in language/direction setup:", error);
-        displayTutorMessage('tutorErrorOllamaResponse');
+        displayTutorMessage('tutorErrorOllamaResponse'); // Inform user
+        // Fallback to asking again generally
         displayTutorMessage('tutorAskLanguageDirection');
         expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
         enableChatInputAfterTutor(true);
@@ -1350,7 +1453,7 @@ async function handleDirectionClarification(userInputText) {
      expectedTutorResponseHandler = null;
      const promptBlueprint = {
         system_instruction: "The user wants to learn '{learn_lang}'. Their known language is '{known_lang}'. We asked if they want to translate FROM '{learn_lang}' TO '{known_lang}' (for understanding) or FROM '{known_lang}' TO '{learn_lang}' (for production). Analyze their response to determine 'input_lang' and 'output_lang'.",
-        learn_lang_context: currentLessonConfig.learn_lang,
+        learn_lang_context: currentLessonConfig.learn_lang, // Remind LLM of the learn_lang
         known_lang_context: KNOWN_LANG,
         user_current_response: userInputText,
         desired_output_format: {
@@ -1358,36 +1461,47 @@ async function handleDirectionClarification(userInputText) {
             example: { input_lang: "english", output_lang: "spanish" }
         }
     };
+    // Replace placeholders in instructions and example
     promptBlueprint.system_instruction = promptBlueprint.system_instruction
         .replace(/{learn_lang}/g, currentLessonConfig.learn_lang)
         .replace(/{known_lang}/g, KNOWN_LANG);
+    promptBlueprint.desired_output_format.description = promptBlueprint.desired_output_format.description
+        .replace(/{learn_lang}/g, currentLessonConfig.learn_lang)
+        .replace(/{known_lang}/g, KNOWN_LANG);
+
 
     try {
         const llmResponse = await callTutorOllamaApi(promptBlueprint);
         if (llmResponse && llmResponse.input_lang && llmResponse.output_lang) {
             currentLessonConfig.input_lang = llmResponse.input_lang.toLowerCase();
             currentLessonConfig.output_lang = llmResponse.output_lang.toLowerCase();
+            // Validate the received languages
             if (currentLessonConfig.input_lang === currentLessonConfig.output_lang) {
-                throw new Error("Input and output cannot be same after clarification.");
+                throw new Error("Input and output languages cannot be same after clarification.");
             }
+            // Ensure the pair makes sense (one is learn_lang, other is known_lang)
             const langs = [currentLessonConfig.input_lang, currentLessonConfig.output_lang];
             if (!langs.includes(currentLessonConfig.learn_lang) || !langs.includes(KNOWN_LANG)) {
+                // This specific check might be too restrictive if user wants to learn lang A from lang B (neither is KNOWN_LANG)
+                // For now, assume one of them is KNOWN_LANG
                 if (!( (currentLessonConfig.input_lang === currentLessonConfig.learn_lang && currentLessonConfig.output_lang === KNOWN_LANG) ||
                        (currentLessonConfig.input_lang === KNOWN_LANG && currentLessonConfig.output_lang === currentLessonConfig.learn_lang) )) {
-                    throw new Error("Invalid language pair after clarification.");
+                    throw new Error("Invalid language pair after clarification (must involve learn_lang and known_lang).");
                 }
             }
             await prepareLessonCore();
-        } else {
+        } else { // Unclear response from LLM
             displayTutorMessage('tutorUnclearIntent');
+            // Ask again for clarification
             displayTutorMessage('tutorAskDirectionClarification', 'tutor', { learn_lang: currentLessonConfig.learn_lang, known_lang: KNOWN_LANG });
-            expectedTutorResponseHandler = handleDirectionClarification;
+            expectedTutorResponseHandler = handleDirectionClarification; // Retry this step
             enableChatInputAfterTutor(true);
             chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
         }
     } catch (error) {
          console.error("Error in direction clarification:", error);
         displayTutorMessage('tutorErrorOllamaResponse');
+        // Fallback: go back to general language direction setup
         displayTutorMessage('tutorAskLanguageDirection');
         expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
         enableChatInputAfterTutor(true);
@@ -1397,27 +1511,32 @@ async function handleDirectionClarification(userInputText) {
 
 
 async function prepareLessonCore() {
+    // Update user preferences with the new lesson config
     user_state.user_preferences.last_learn_lang = currentLessonConfig.learn_lang;
     user_state.user_preferences.last_input_lang = currentLessonConfig.input_lang;
     user_state.user_preferences.last_output_lang = currentLessonConfig.output_lang;
+    
+    // Initialize proficiency for the language if it's new
     if (!user_state.language_proficiency[currentLessonConfig.learn_lang]) {
         user_state.language_proficiency[currentLessonConfig.learn_lang] = {
             level: 0.1, last_practiced_utc: null, strengths: [], weaknesses: [],
-            correct_streak_session: 0, overall_accuracy_estimate: 0
+            correct_streak_session: 0, overall_accuracy_estimate: 0 // 0-1 scale for accuracy
         };
     }
+    // Initialize learning focus if new
     if (!user_state.learning_focus[currentLessonConfig.learn_lang]) {
         user_state.learning_focus[currentLessonConfig.learn_lang] = [];
     }
 
+    // Reset current lesson data in user_state for the new lesson
     user_state.current_lesson_data = {
         input_lang: currentLessonConfig.input_lang,
         output_lang: currentLessonConfig.output_lang,
-        interactions: []
+        interactions: [] // Reset interactions for the new lesson
     };
-    lesson_interactions = [];
-    saveUserState();
-    updateStudyButtonText();
+    lesson_interactions = []; // Also reset global lesson_interactions array for this session
+    saveUserState(); // Save updated preferences and initialized structures
+    updateStudyButtonText(); // Reflect new learn_lang on button
 
     displayTutorMessage('tutorReadyToStartLesson', 'tutor', {
         learn_lang: currentLessonConfig.learn_lang,
@@ -1425,29 +1544,32 @@ async function prepareLessonCore() {
         output_lang: currentLessonConfig.output_lang
     });
 
+    // Prompt to get sentences from LLM
     const promptBlueprint = {
-        system_instruction: "You are a helpful and encouraging language teaching AI. The student wants to translate 5 sentences from '{input_lang}' to '{output_lang}'. Their primary goal is to improve their '{learn_lang}'. Based on their current learning state for '{learn_lang}', provide 5 sentences in '{input_lang}'. The sentences should be suitable for their proficiency in '{learn_lang}' when translated.",
-        student_learning_state: user_state,
+        system_instruction: "You are a helpful and encouraging language teaching AI. The student wants to translate 5 sentences from '{input_lang}' to '{output_lang}'. Their primary goal is to improve their '{learn_lang}'. Based on their current learning state for '{learn_lang}' (proficiency level, strengths, weaknesses), provide 5 sentences in '{input_lang}'. The sentences should be suitable for their proficiency in '{learn_lang}' when translated, gradually increasing in complexity if appropriate. Focus on common vocabulary and grammar structures.",
+        student_learning_state: user_state, // Provide full user state for context
         lesson_config: currentLessonConfig,
         desired_output_format: {
-            description: "Return a JSON object with a single key 'sentences', which is an array of 5 strings in '{input_lang}'.",
-            example: {"sentences": ["sentence1", "sentence2", "sentence3", "sentence4", "sentence5"]}
+            description: "Return a JSON object with a single key 'sentences', which is an array of 5 strings. These strings are the sentences in '{input_lang}' for the student to translate.",
+            example: {"sentences": ["sentence1 in input_lang", "sentence2 in input_lang", "sentence3 in input_lang", "sentence4 in input_lang", "sentence5 in input_lang"]}
         }
     };
+    // Replace placeholders
     promptBlueprint.system_instruction = promptBlueprint.system_instruction
         .replace(/{input_lang}/g, currentLessonConfig.input_lang)
         .replace(/{output_lang}/g, currentLessonConfig.output_lang)
         .replace(/{learn_lang}/g, currentLessonConfig.learn_lang);
     promptBlueprint.desired_output_format.description = promptBlueprint.desired_output_format.description
         .replace('{input_lang}', currentLessonConfig.input_lang);
+    promptBlueprint.desired_output_format.example.sentences = promptBlueprint.desired_output_format.example.sentences.map(s => s.replace('input_lang', currentLessonConfig.input_lang));
 
 
     try {
         const llmResponse = await callTutorOllamaApi(promptBlueprint);
-        if (llmResponse && llmResponse.sentences && Array.isArray(llmResponse.sentences) && llmResponse.sentences.length === 5) {
-            lesson_sentences = llmResponse.sentences;
+        if (llmResponse && llmResponse.sentences && Array.isArray(llmResponse.sentences) && llmResponse.sentences.length > 0) { // Check for at least 1 sentence
+            lesson_sentences = llmResponse.sentences.slice(0, 5); // Take up to 5 sentences
             current_sentence_index = 0;
-            startTranslationExerciseCycle();
+            startTranslationExerciseCycle(); // Start the first exercise
         } else {
             displayTutorMessage('tutorErrorNoSentences');
             exitTutoringMode();
@@ -1463,11 +1585,11 @@ function startTranslationExerciseCycle() {
         const currentSentence = lesson_sentences[current_sentence_index];
         displayTutorMessage(`${getTranslation('tutorTranslateThis', { output_lang: currentLessonConfig.output_lang })}\n\n"${currentSentence}"`, 'tutor');
         expectedTutorResponseHandler = processUserTranslation;
-        enableChatInputAfterTutor(true);
+        enableChatInputAfterTutor(true); // Enable input for user's translation
         chatInput.placeholder = getTranslation('tutorChatInputTranslationPlaceholder', {output_lang: currentLessonConfig.output_lang});
         chatInput.focus();
     } else {
-        concludeLesson();
+        concludeLesson(); // All sentences done
     }
 }
 
@@ -1476,7 +1598,7 @@ async function processUserTranslation(userTranslationText) {
     const originalSentence = lesson_sentences[current_sentence_index];
 
     const promptBlueprint = {
-        system_instruction: "You are a helpful and encouraging language teaching AI. The student is learning '{learn_lang}'. They translated a sentence from '{input_lang}' to '{output_lang}'. Evaluate their translation, provide corrections and advice, and update their entire learning state.",
+        system_instruction: "You are a helpful and encouraging language teaching AI. The student is learning '{learn_lang}'. They translated a sentence from '{input_lang}' to '{output_lang}'. Evaluate their translation for accuracy and naturalness. Provide specific corrections (if any), positive reinforcement, and brief, actionable advice. Update their learning state, including proficiency level (0.0 to 1.0 scale), strengths, weaknesses, overall_accuracy_estimate (0.0 to 1.0, reflecting this attempt and past performance), and correct_streak_session. Be detailed in the state update.",
         exercise_details: {
             learn_lang: currentLessonConfig.learn_lang,
             input_lang: currentLessonConfig.input_lang,
@@ -1484,10 +1606,10 @@ async function processUserTranslation(userTranslationText) {
             output_lang: currentLessonConfig.output_lang,
             user_translation: userTranslationText
         },
-        student_learning_state_before_this_interaction: user_state,
+        student_learning_state_before_this_interaction: user_state, // Pass the entire current user_state
         desired_output_format: {
-            description: "Return a JSON object with 'your_corrections' (string), 'your_advice' (string), and 'updated_user_state' (the *complete, modified* user_state JSON object reflecting changes based on this interaction, especially for '{learn_lang}' proficiency metrics like level, strengths, weaknesses, last_practiced_utc, accuracy, streak). Accuracy should be a decimal value between 0 and 1 (e.g., 0.75 for 75%).",
-            example: { your_corrections: "...", your_advice: "...", updated_user_state: { /* complete user_state object with overall_accuracy_estimate as decimal */ } }
+            description: "Return a JSON object with: 'feedback_text' (string, combines corrections and advice for the user, e.g., 'Good try! A small correction: ... Also, remember ...'), and 'updated_user_state' (the *complete, modified* user_state JSON object reflecting changes based on this interaction. Ensure '{learn_lang}' proficiency metrics like level, strengths, weaknesses, last_practiced_utc, overall_accuracy_estimate (as a decimal 0.0-1.0), correct_streak_session are updated. The overall_accuracy_estimate should be a weighted average or similar, not just this one attempt).",
+            example: { feedback_text: "Excellent! That's correct. / Almost there! Instead of 'X', try 'Y'. This is because...", updated_user_state: { /* complete user_state object */ } }
         }
     };
      promptBlueprint.system_instruction = promptBlueprint.system_instruction
@@ -1497,68 +1619,78 @@ async function processUserTranslation(userTranslationText) {
      promptBlueprint.desired_output_format.description = promptBlueprint.desired_output_format.description
         .replace('{learn_lang}', currentLessonConfig.learn_lang);
 
-
     try {
         const llmResponse = await callTutorOllamaApi(promptBlueprint);
-        if (llmResponse && llmResponse.your_corrections && llmResponse.your_advice && llmResponse.updated_user_state) {
-            displayTutorMessage(`**Correction:**\n${llmResponse.your_corrections}\n\n**Advice:**\n${llmResponse.your_advice}`, 'tutor');
+        // Ensure all expected parts of the response are present
+        if (llmResponse && typeof llmResponse.feedback_text === 'string' && llmResponse.updated_user_state && typeof llmResponse.updated_user_state === 'object') {
+            displayTutorMessage(llmResponse.feedback_text, 'tutor'); // Display feedback to user
 
-            user_state = llmResponse.updated_user_state;
+            // IMPORTANT: Update the global user_state with the one returned by the LLM
+            user_state = llmResponse.updated_user_state; 
+            
+            // Ensure current_lesson_data is preserved or re-initialized if wiped by LLM
             if (!user_state.current_lesson_data || !user_state.current_lesson_data.input_lang) {
                 user_state.current_lesson_data = {
                     input_lang: currentLessonConfig.input_lang,
                     output_lang: currentLessonConfig.output_lang,
-                    interactions: lesson_interactions
+                    interactions: lesson_interactions // Restore from local copy if LLM cleared it
                 };
             }
 
 
+            // Record this interaction for the lesson summary
             const interactionData = {
                 original_sentence: originalSentence,
                 user_translation: userTranslationText,
-                ai_correction: llmResponse.your_corrections,
-                ai_advice: llmResponse.your_advice
+                ai_feedback: llmResponse.feedback_text // Storing the combined feedback
+                // ai_correction: llmResponse.your_corrections, // If you split them in prompt
+                // ai_advice: llmResponse.your_advice // If you split them in prompt
             };
-            lesson_interactions.push(interactionData);
+            lesson_interactions.push(interactionData); // Update local session log
+            // Also update it in the user_state being prepared for saving
             if(user_state.current_lesson_data && user_state.current_lesson_data.interactions) {
                 user_state.current_lesson_data.interactions.push(interactionData);
-            } else {
+            } else { // Should not happen if initialized correctly
                 user_state.current_lesson_data = { interactions: [interactionData], ...currentLessonConfig };
             }
 
 
-            saveUserState();
+            saveUserState(); // Save the updated state after each interaction
 
             current_sentence_index++;
-            startTranslationExerciseCycle();
+            startTranslationExerciseCycle(); // Move to next sentence or conclude
         } else {
-            throw new Error("Invalid LLM response structure for feedback.");
+            throw new Error("Invalid LLM response structure for feedback. Missing feedback_text or updated_user_state.");
         }
     } catch (error) {
+        console.error("Error processing user translation:", error)
         displayTutorMessage('tutorErrorOllamaResponse');
+        // Decide how to proceed: skip sentence or end lesson? For now, skip.
         current_sentence_index++;
         startTranslationExerciseCycle();
     }
 }
 
 async function concludeLesson() {
-    displayTutorMessage("Processing lesson summary...", 'tutor');
+    displayTutorMessage("tutorConcludingMessage", 'tutor'); // e.g., "Let's summarize your lesson..."
 
+    // Final update of lesson interactions in user_state before sending to LLM for summary
     if (user_state.current_lesson_data) {
-         user_state.current_lesson_data.interactions = lesson_interactions;
+         user_state.current_lesson_data.interactions = lesson_interactions; // Ensure it has the latest
     }
 
     const promptBlueprint = {
-        system_instruction: "You are a helpful and encouraging language teaching AI. The student has completed a lesson translating 5 sentences from '{input_lang}' to '{output_lang}', focusing on improving their '{learn_lang}'. Summarize their performance, offer motivation, and suggest a next focus.",
+        system_instruction: "You are a helpful and encouraging language teaching AI. The student has completed a lesson translating sentences from '{input_lang}' to '{output_lang}', focusing on improving their '{learn_lang}'. Review their 'student_learning_state_after_lesson' (especially 'current_lesson_data.interactions' and '{learn_lang}' proficiency). Provide a concise, positive summary of their performance, offer motivation, and suggest one or two specific areas for their next focus in '{learn_lang}'.",
         lesson_context: {
             learn_lang: currentLessonConfig.learn_lang,
             input_lang: currentLessonConfig.input_lang,
-            output_lang: currentLessonConfig.output_lang
+            output_lang: currentLessonConfig.output_lang,
+            number_of_exercises: lesson_interactions.length
         },
-        student_learning_state_after_lesson: user_state,
+        student_learning_state_after_lesson: user_state, // Entire state including all interactions
         desired_output_format: {
-            description: "Return a JSON object with 'lesson_summary_text' (string, overall summary of the lesson), 'motivational_message' (string), and 'next_focus_suggestion' (string, optional, for '{learn_lang}').",
-            example: { lesson_summary_text: "You did well on X, but could improve Y.", motivational_message: "Keep practicing!", next_focus_suggestion: "verb conjugations" }
+            description: "Return a JSON object with: 'lesson_summary_for_user' (string, overall friendly summary and motivation for the student), and 'next_focus_suggestions' (array of strings, 1-2 brief suggestions for what to focus on next in '{learn_lang}', e.g., ['verb conjugations', 'using prepositions']).",
+            example: { lesson_summary_for_user: "Great job completing the lesson! You showed good progress in X. Keep practicing Y!", next_focus_suggestions: ["past tense verbs", "sentence structure"] }
         }
     };
     promptBlueprint.system_instruction = promptBlueprint.system_instruction
@@ -1571,84 +1703,91 @@ async function concludeLesson() {
 
     try {
         const llmResponse = await callTutorOllamaApi(promptBlueprint);
-        if (llmResponse && llmResponse.motivational_message) { // motivational_message is a good indicator of a valid response
-            const summaryText = (typeof llmResponse.lesson_summary_text === 'string' && llmResponse.lesson_summary_text.trim() !== "")
-                                ? llmResponse.lesson_summary_text
-                                : "Well done on completing the exercises!";
+        // Check for expected fields in the LLM response
+        if (llmResponse && typeof llmResponse.lesson_summary_for_user === 'string' && Array.isArray(llmResponse.next_focus_suggestions)) {
+            
+            displayTutorMessage(`**Lesson Summary:**\n${llmResponse.lesson_summary_for_user}`, 'tutor');
 
-            displayTutorMessage(`**Lesson Summary:**\n${summaryText}\n\n**Motivation:**\n${llmResponse.motivational_message}`, 'tutor');
-
-            if (llmResponse.next_focus_suggestion && currentLessonConfig.learn_lang) {
-                displayTutorMessage(`**Next Focus Suggestion for ${currentLessonConfig.learn_lang}:** ${llmResponse.next_focus_suggestion}`, 'tutor');
-                if (user_state.learning_focus && user_state.learning_focus[currentLessonConfig.learn_lang] &&
-                    !user_state.learning_focus[currentLessonConfig.learn_lang].includes(llmResponse.next_focus_suggestion)) {
-                    user_state.learning_focus[currentLessonConfig.learn_lang].push(llmResponse.next_focus_suggestion);
+            if (llmResponse.next_focus_suggestions.length > 0 && currentLessonConfig.learn_lang) {
+                const suggestionsText = llmResponse.next_focus_suggestions.join(', ');
+                displayTutorMessage(`**Next Focus Suggestion for ${currentLessonConfig.learn_lang}:** ${suggestionsText}`, 'tutor');
+                
+                // Update user_state.learning_focus with these suggestions
+                if (user_state.learning_focus && user_state.learning_focus[currentLessonConfig.learn_lang]) {
+                    llmResponse.next_focus_suggestions.forEach(suggestion => {
+                        if (!user_state.learning_focus[currentLessonConfig.learn_lang].includes(suggestion)) {
+                            user_state.learning_focus[currentLessonConfig.learn_lang].push(suggestion);
+                        }
+                    });
                 }
             }
 
-            // Add to history only if lesson config is valid
+            // Add a summary to lesson_history_summary in user_state
             if (currentLessonConfig.learn_lang && currentLessonConfig.input_lang && currentLessonConfig.output_lang) {
                 if (!user_state.lesson_history_summary) user_state.lesson_history_summary = [];
+                // Use a part of the LLM's summary or a generic one
+                const takeaway = llmResponse.lesson_summary_for_user.substring(0, 150) + (llmResponse.lesson_summary_for_user.length > 150 ? "..." : "");
                 user_state.lesson_history_summary.push({
                     date_utc: new Date().toISOString(),
                     lang_pair: `${currentLessonConfig.input_lang}-${currentLessonConfig.output_lang}`,
                     learn_lang: currentLessonConfig.learn_lang,
-                    key_takeaway: summaryText.substring(0, 100) + (summaryText.length > 100 ? "..." : "")
+                    key_takeaway: takeaway,
+                    num_exercises: lesson_interactions.length
                 });
-            } else {
-                console.warn("Skipping adding lesson to history due to incomplete lesson config at conclusion.", currentLessonConfig);
             }
         } else {
             throw new Error("Invalid LLM response structure for lesson summary.");
         }
     } catch (error) {
         console.error("Error concluding lesson with LLM:", error);
-        displayTutorMessage('tutorErrorOllamaResponse');
-        // Still add a generic history item if config is valid, as the lesson did happen
+        displayTutorMessage('tutorErrorOllamaResponse'); // Inform user of error
+        // Add a generic history item even if LLM summary fails, as lesson did occur
         if (currentLessonConfig.learn_lang && currentLessonConfig.input_lang && currentLessonConfig.output_lang) {
             if (!user_state.lesson_history_summary) user_state.lesson_history_summary = [];
              user_state.lesson_history_summary.push({
                 date_utc: new Date().toISOString(),
                 lang_pair: `${currentLessonConfig.input_lang}-${currentLessonConfig.output_lang}`,
                 learn_lang: currentLessonConfig.learn_lang,
-                key_takeaway: "Lesson completed (summary generation error)."
+                key_takeaway: "Lesson completed (summary generation error).",
+                num_exercises: lesson_interactions.length
             });
         }
     } finally {
-        // Clear current lesson data from user_state and save
+        // IMPORTANT: Clear current_lesson_data from user_state as the lesson is now concluded
         if (user_state.current_lesson_data) {
             user_state.current_lesson_data = { input_lang: null, output_lang: null, interactions: [] };
         }
-        saveUserState();
+        saveUserState(); // Save the final state including history summary and cleared current_lesson_data
         displayTutorMessage('tutorLessonComplete');
-        exitTutoringMode(); // This will also call saveUserState again, which is fine.
+        exitTutoringMode(false); // Exit tutoring mode without showing the "Exiting" message again
     }
 }
 
 function initiateTutoringSession() {
     if (isTutoringActive) {
-        if (confirm("A tutoring session is already active. Do you want to end it and start a new one?")) {
-            exitTutoringMode(false);
+        if (confirm(getTranslation("confirmExitExistingTutoring"))) { // TODO: Add this translation key
+            exitTutoringMode(false); // Exit silently before starting new
         } else {
-            return;
+            return; // User cancelled
         }
     }
     if (isAiResponding || isTutorResponding) {
-        alert("Please wait for the current AI response to complete.");
+        alert(getTranslation("waitForAiResponseComplete")); // TODO: Add this translation key
         return;
     }
 
     isTutoringActive = true;
-    setAgentStatus('tutoring');
-    updateStudyButtonText();
-    disableChatInputForTutor();
+    setAgentStatus('tutoring'); // Update agent header status
+    updateStudyButtonText(); // Update button text/title
+    disableChatInputForTutor('tutorInitializingPlaceholder'); // Disable main chat input
 
-    loadUserState();
+    loadUserState(); // Ensure user_state is fresh
 
     const lastLearnLang = user_state.user_preferences.last_learn_lang;
     const lastInputLang = user_state.user_preferences.last_input_lang;
     const lastOutputLang = user_state.user_preferences.last_output_lang;
 
+    // Decide initial prompt based on whether there was a previous session
     if (lastLearnLang && lastInputLang && lastOutputLang) {
         displayTutorMessage('tutorWelcomeBack', 'tutor', {
             last_learn_lang: lastLearnLang,
@@ -1657,12 +1796,14 @@ function initiateTutoringSession() {
         });
         expectedTutorResponseHandler = handleInitialTutorInteraction;
     } else {
-        displayTutorMessage('tutorAskLanguageDirection');
+        displayTutorMessage('tutorAskLanguageDirection'); // General prompt for new users
         expectedTutorResponseHandler = handleGeneralLanguageDirectionSetup;
     }
-    enableChatInputAfterTutor(true);
+    enableChatInputAfterTutor(true); // Enable input for tutor interaction
     chatInput.placeholder = getTranslation('tutorChatInputPlaceholder');
     chatInput.focus();
+    
+    // Close any open popups
     closePopup(settingsPanel);
     closePopup(aboutPopupOverlay);
     closePopup(learnerStatsPopupOverlay);
@@ -1675,17 +1816,18 @@ function exitTutoringMode(showMessage = true) {
     expectedTutorResponseHandler = null;
     lesson_sentences = [];
     current_sentence_index = 0;
-    lesson_interactions = [];
-    currentLessonConfig = { learn_lang: null, input_lang: null, output_lang: null };
+    lesson_interactions = []; // Clear session-specific lesson data
+    currentLessonConfig = { learn_lang: null, input_lang: null, output_lang: null }; // Reset config
 
-    if(user_state && user_state.current_lesson_data) {
+    // Clear current_lesson_data in user_state if not already cleared by concludeLesson
+    if(user_state && user_state.current_lesson_data && user_state.current_lesson_data.input_lang) {
         user_state.current_lesson_data = { input_lang: null, output_lang: null, interactions: [] };
         saveUserState(); // Save the cleared current_lesson_data
     }
 
-    setAgentStatus('active');
-    updateStudyButtonText();
-    enableChatInputAfterTutor(false);
+    setAgentStatus('active'); // Reset agent header status
+    updateStudyButtonText(); // Update study button text
+    enableChatInputAfterTutor(false); // Re-enable general chat input
 }
 
 if (startStudyBtnMain) {
@@ -1695,15 +1837,15 @@ if (startStudyBtnMain) {
 if (clearLearningProgressBtn) {
     clearLearningProgressBtn.addEventListener('click', () => {
         if (confirm(getTranslation('confirmClearLearningProgress'))) {
-            localStorage.removeItem(USER_STATE_KEY);
-            user_state = getDefaultUserState();
-            if (isTutoringActive) {
-                exitTutoringMode(false);
+            localStorage.removeItem(USER_STATE_KEY); // Remove all learning data
+            user_state = getDefaultUserState(); // Reset to default state
+            if (isTutoringActive) { // If tutoring was active, exit it
+                exitTutoringMode(false); // Exit silently
             }
-            displaySystemMessage('learningProgressCleared');
-            updateStudyButtonText();
+            displaySystemMessage('learningProgressCleared'); // Inform user
+            updateStudyButtonText(); // Update button as there's no history now
             if (settingsPanel.classList.contains('is-open')) {
-                settingsPanel.classList.remove('is-open');
+                settingsPanel.classList.remove('is-open'); // Close settings panel
             }
         }
     });
@@ -1717,34 +1859,37 @@ if (sendButton && chatInput) {
         const userText = chatInput.value.trim();
 
         if (isTutoringActive) {
-            if (isTutorResponding) return;
-            if (!userText) return;
+            if (isTutorResponding) return; // Don't send if tutor is already processing
+            if (!userText) return; // Require some input for tutor interaction
 
-            addNewMessage(userText, 'user');
-            chatInput.value = '';
-            disableChatInputForTutor();
+            addNewMessage(userText, 'user'); // Add user's message to chat
+            chatInput.value = ''; // Clear input
+            disableChatInputForTutor('tutorThinkingPlaceholder'); // Disable input while tutor thinks
 
             if (expectedTutorResponseHandler) {
-                await expectedTutorResponseHandler(userText);
+                await expectedTutorResponseHandler(userText); // Process with current handler
             } else {
-                console.warn("Tutoring active but no response handler set.");
-                enableChatInputAfterTutor(true);
+                // This case should ideally not be reached if logic is correct
+                console.warn("Tutoring active but no response handler set. Re-enabling input.");
+                enableChatInputAfterTutor(true); // Re-enable input if stuck
             }
-            return;
+            return; // End here for tutoring mode
         }
 
-        if (isAiResponding) return;
+        // Regular chat mode below
+        if (isAiResponding) return; // Don't send if AI is already responding
 
         const originalImageForProcessing = currentOriginalImageBase64DataUri;
-        const previewImageForHistory = currentResizedPreviewDataUri;
+        const previewImageForHistory = currentResizedPreviewDataUri; // This is the smaller one
         const hasImageToSend = !!originalImageForProcessing;
 
-        if (!userText && !hasImageToSend) return;
+        if (!userText && !hasImageToSend) return; // Nothing to send
 
+        // For user message, use `previewImageForHistory` for display in chat right away
         addNewMessage(userText, 'user', hasImageToSend, previewImageForHistory);
         chatInput.value = '';
         chatInput.focus();
-        clearSelectedImageState();
+        clearSelectedImageState(); // Clear preview and stored image data
 
         isAiResponding = true;
         setAgentStatus('typing');
@@ -1755,15 +1900,17 @@ if (sendButton && chatInput) {
         let ollamaApiImagePayload = null;
         if (hasImageToSend && originalImageForProcessing) {
             try {
+                // Resize original image specifically for Ollama API
                 const resizedForOllamaDataUri = await resizeImage(
                     originalImageForProcessing,
                     OLLAMA_IMAGE_MAX_DIMENSION_PX,
                     OLLAMA_IMAGE_MAX_DIMENSION_PX,
                     IMAGE_QUALITY_OLLAMA
                 );
-                ollamaApiImagePayload = resizedForOllamaDataUri.split(',')[1];
+                ollamaApiImagePayload = resizedForOllamaDataUri.split(',')[1]; // Get only base64 part
             } catch (err) {
                 console.error("Error resizing image for Ollama:", err);
+                // Fallback: try to send original if resizing fails, but remove data URI prefix
                 if (originalImageForProcessing) {
                    const parts = originalImageForProcessing.split(',');
                    if (parts.length > 1) ollamaApiImagePayload = parts[1];
@@ -1774,12 +1921,12 @@ if (sendButton && chatInput) {
         const chatHistoryString = getChatHistoryForPrompt();
         const ollamaPrompt = constructOllamaPrompt(userText, chatHistoryString, hasImageToSend);
 
-        let aiMessageElement;
+        let aiMessageElement; // To hold the AI's message div if streaming
         let accumulatedAiResponse = "";
         const streamEnabled = streamResponsesToggle ? streamResponsesToggle.checked : true;
 
         if (streamEnabled) {
-            aiMessageElement = createVisualAiMessage();
+            aiMessageElement = createVisualAiMessage(); // Create empty AI message bubble
         }
 
         try {
@@ -1793,34 +1940,41 @@ if (sendButton && chatInput) {
                     scrollToBottom();
                 }, ollamaApiImagePayload);
 
+                // After streaming finishes, finalize the message in history
                 const finalTimestamp = Date.now();
                 const timeDiv = aiMessageElement.querySelector('.message-time');
-                 if (timeDiv) {
+                 if (timeDiv) { // Add timestamp to the visual message
                     timeDiv.textContent = new Date(finalTimestamp).toLocaleTimeString(currentLanguage, { hour: 'numeric', minute: '2-digit' });
                  }
+                // Save the complete message to history
                 saveMessageToHistory({ text: accumulatedAiResponse, type: 'ai', timestamp: finalTimestamp, hasImage: false, imageBase64: null });
 
-            } else {
+            } else { // Not streaming
                 const aiResponseText = await callOllamaApi(ollamaPrompt, () => {}, ollamaApiImagePayload);
-                addNewMessage(aiResponseText, 'ai');
+                addNewMessage(aiResponseText, 'ai'); // Adds directly to UI and history
             }
-            isOllamaReachableForHeader = true;
+            isOllamaReachableForHeader = true; // Successful communication
         } catch (error) {
             console.error("Ollama processing error:", error);
-            if (aiMessageElement && streamEnabled) {
+            if (aiMessageElement && streamEnabled) { // If streaming failed, remove placeholder
                 aiMessageElement.remove();
             }
+            // Display error message as an AI response
             addNewMessage(getTranslation('ollamaError', { error: error.message || "Unknown error" }), 'ai');
-            isOllamaReachableForHeader = false;
+            isOllamaReachableForHeader = false; // Communication failed
         } finally {
             isAiResponding = false;
-            setAgentStatus(isTutoringActive ? 'tutoring' : 'active');
-            sendButton.disabled = isTutoringActive;
-            if (attachFileBtn) attachFileBtn.disabled = isTutoringActive;
-            startPeriodicOllamaHeaderCheck();
-            if (isTutoringActive && expectedTutorResponseHandler) {
+            // Agent status depends on whether tutoring is active
+            setAgentStatus(isTutoringActive ? 'tutoring' : 'active'); 
+            sendButton.disabled = isTutoringActive; // Disable send if tutoring (tutor controls flow)
+            if (attachFileBtn) attachFileBtn.disabled = isTutoringActive; // Disable attach if tutoring
+            
+            startPeriodicOllamaHeaderCheck(); // Restart reachability check
+
+            // Re-enable input based on mode
+            if (isTutoringActive && expectedTutorResponseHandler) { // If tutoring and waiting for user
                 enableChatInputAfterTutor(true);
-            } else if (!isTutoringActive) {
+            } else if (!isTutoringActive) { // If not tutoring, enable general chat
                 enableChatInputAfterTutor(false);
             }
         }
@@ -1828,11 +1982,11 @@ if (sendButton && chatInput) {
 
     sendButton.addEventListener('click', handleSendMessage);
     chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            if (isTutoringActive && isTutorResponding) return;
-            if (!isTutoringActive && isAiResponding) return;
+        if (e.key === 'Enter' && !e.shiftKey) { // Send on Enter (not Shift+Enter)
+            if (isTutoringActive && isTutorResponding) return; // Block if tutor busy
+            if (!isTutoringActive && isAiResponding) return; // Block if AI busy
 
-            e.preventDefault();
+            e.preventDefault(); // Prevent newline in input
             handleSendMessage();
         }
     });
@@ -1840,32 +1994,38 @@ if (sendButton && chatInput) {
 
 // --- Initial Application Load ---
 async function initializeApp() {
-    const translationsLoadedSuccessfully = await fetchTranslations(); // Load translations first
+    const translationsLoadedSuccessfully = await fetchTranslations(); 
 
     const savedDarkModePref = localStorage.getItem(DARK_MODE_KEY);
     setDarkMode(savedDarkModePref === 'true');
 
     if (markdownToggle) {
         const savedMarkdownPref = localStorage.getItem(MARKDOWN_ENABLED_KEY);
-        markdownToggle.checked = savedMarkdownPref === null ? true : (savedMarkdownPref === 'true');
+        // Default to true if not set, otherwise use the stored string 'true'/'false'
+        markdownToggle.checked = (savedMarkdownPref === null) ? true : (savedMarkdownPref === 'true');
     }
+    if (streamResponsesToggle) { // Assuming similar toggle for streaming
+        const savedStreamPref = localStorage.getItem('tutorAiStreamResponsesEnabled'); // Example key
+        streamResponsesToggle.checked = (savedStreamPref === null) ? true : (savedStreamPref === 'true');
+         streamResponsesToggle.addEventListener('change', function() { // Save preference
+            localStorage.setItem('tutorAiStreamResponsesEnabled', this.checked.toString());
+        });
+    }
+
+
     const lastActiveTab = localStorage.getItem(ACTIVE_SETTINGS_TAB_KEY) || 'basic';
     setActiveSettingsTab(lastActiveTab);
 
     loadOllamaSettings();
-    loadUserState(); // This calls updateStudyButtonText which uses getTranslation
-    applyTranslations(); // Apply translations (either full or fallback from fetchTranslations)
-    loadChatHistory();   // This calls displaySystemMessage which uses getTranslation
+    loadUserState(); 
+    applyTranslations(); // Apply translations (either full or fallback)
+    loadChatHistory();   
 
     if (!translationsLoadedSuccessfully) {
-        // displaySystemMessage itself relies on translations.
-        // The key 'systemMsgTranslationsFailed' MUST be in the fallback object in fetchTranslations.
-        // Use a timeout to ensure this message appears after initial history/loading messages.
         setTimeout(() => {
-            if (chatMessagesContainer) { // Ensure the container exists
+            if (chatMessagesContainer) {
                  displaySystemMessage("systemMsgTranslationsFailed");
             } else {
-                // Absolute fallback if UI isn't ready, though unlikely
                 alert(getTranslation("systemMsgTranslationsFailed"));
             }
         }, 100);
@@ -1874,8 +2034,8 @@ async function initializeApp() {
     if (typeof marked === 'undefined') {
         console.warn("Marked.js library is not loaded. Markdown formatting will fallback to simple newline-to-br conversion for AI messages.");
         if(markdownToggle) {
-            markdownToggle.checked = false;
-            markdownToggle.disabled = true;
+            markdownToggle.checked = false; // Force it off
+            markdownToggle.disabled = true; // Disable the toggle
         }
     } else {
         marked.setOptions({
@@ -1887,11 +2047,11 @@ async function initializeApp() {
         });
     }
 
+    // Initial check for Ollama status and start periodic checks
     checkOllamaForHeaderUpdate().then(() => {
         startPeriodicOllamaHeaderCheck();
     });
 
-    // Close all popups on Escape key
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             closePopup(settingsPanel);
