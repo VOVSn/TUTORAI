@@ -1,3 +1,5 @@
 codebase
 codecollect*
 venv
+tutorai/tutorai_chat_history.json
+tutorai/tutorai_student_progression.json
