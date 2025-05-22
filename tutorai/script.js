@@ -7,7 +7,7 @@ const settingsButton = document.getElementById('settingsButton');
 const settingsPanel = document.getElementById('settingsPanel');
 const settingsTabButtons = document.querySelectorAll('.settings-tab-button');
 const settingsTabContents = document.querySelectorAll('.settings-tab-content');
-const darkModeToggle = document.getElementById('darkModeToggle');
+const themeSelector = document.getElementById('themeSelector'); // New theme selector
 const markdownToggle = document.getElementById('markdownToggle');
 const streamResponsesToggle = document.getElementById('streamResponsesToggle');
 const body = document.body;
@@ -52,6 +52,7 @@ const PREVIEW_IMAGE_MAX_DIMENSION_PX = 300;
 const OLLAMA_IMAGE_MAX_DIMENSION_PX = 512;
 const IMAGE_QUALITY_PREVIEW = 0.85;
 const IMAGE_QUALITY_OLLAMA = 0.9;
+const DEFAULT_THEME = 'light';
 
 
 // --- Application State (loaded from/saved to files) ---
@@ -60,7 +61,7 @@ let appSettings = { // Default structure for settings
     ollamaUserModel: 'gemma3:4b',
     ollamaTemperatureSetting: DEFAULT_OLLAMA_TEMPERATURE.toFixed(1),
     tutorAiChatMarkdownEnabled: true,
-    tutorAiChatDarkModeEnabled: false,
+    currentTheme: DEFAULT_THEME, // Replaces tutorAiChatDarkModeEnabled
     tutorAiActiveSettingsTab: 'basic',
     tutorAiStreamResponsesEnabled: true
 };
@@ -182,6 +183,10 @@ async function fetchTranslations() {
                 chatInputPlaceholder: "Ask TUTORAI something... (Default)",
                 ollamaEndpointPlaceholder: "http://localhost:11434/api/generate",
                 ollamaModelPlaceholder: "gemma3:4b",
+                themeLabel: "Theme (Default)",
+                themeLight: "Light (Default)",
+                themeDark: "Dark (Default)",
+                themeMemphis: "Memphis (Default)",
             }
         };
         console.warn("Using minimal fallback translations due to error with translations.json.");
@@ -203,10 +208,11 @@ function applyTranslations() {
         const key = el.dataset.translateKey;
         const isButton = (el.tagName === 'INPUT' && el.type === 'button') || el.tagName === 'BUTTON';
         const isTitleElement = el.tagName === 'TITLE';
+        const isOptionElement = el.tagName === 'OPTION';
 
         if (el.id === 'startStudyBtnMain') return;
 
-        if (isButton || isTitleElement) {
+        if (isButton || isTitleElement || isOptionElement) { // Add isOptionElement
             el.textContent = getTranslation(key);
         } else if (el.hasAttribute('placeholder') && el.tagName === 'INPUT' && key) {
              el.placeholder = getTranslation(key);
@@ -450,7 +456,27 @@ async function saveAllAppSettings() {
     await saveDataToFile(SETTINGS_FILE, appSettings);
 }
 
+function applyTheme(themeName) {
+    body.classList.remove('light-mode', 'dark-mode', 'memphis-mode');
+    if (themeName !== 'light') { // Assuming 'light' is the default and might not need a class
+        body.classList.add(themeName + '-mode');
+    }
+    // Optionally, add 'light-mode' if you want specific styles for it beyond the base
+    // else { body.classList.add('light-mode'); }
+    console.log("Theme applied:", themeName);
+}
+
 function loadAndApplyAppSettings() {
+    // Migrate old dark mode setting if present
+    if (appSettings.hasOwnProperty('tutorAiChatDarkModeEnabled') && !appSettings.hasOwnProperty('currentTheme')) {
+        appSettings.currentTheme = appSettings.tutorAiChatDarkModeEnabled ? 'dark' : 'light';
+        delete appSettings.tutorAiChatDarkModeEnabled; // Remove old setting
+        console.log("Migrated dark mode setting to currentTheme:", appSettings.currentTheme);
+    }
+    if (!appSettings.currentTheme) { // Ensure a theme is set
+        appSettings.currentTheme = DEFAULT_THEME;
+    }
+
     if (ollamaEndpointInput) ollamaEndpointInput.value = appSettings.ollamaUserEndpoint;
     if (ollamaModelInput) ollamaModelInput.value = appSettings.ollamaUserModel;
     if (ollamaTemperatureInput) {
@@ -462,10 +488,11 @@ function loadAndApplyAppSettings() {
         appSettings.ollamaTemperatureSetting = tempToSet.toFixed(1);
     }
 
-    if (darkModeToggle) {
-        darkModeToggle.checked = appSettings.tutorAiChatDarkModeEnabled;
-        setDarkModeUI(appSettings.tutorAiChatDarkModeEnabled);
+    if (themeSelector) {
+        themeSelector.value = appSettings.currentTheme;
+        applyTheme(appSettings.currentTheme);
     }
+
     if (markdownToggle) {
         markdownToggle.checked = appSettings.tutorAiChatMarkdownEnabled;
     }
@@ -475,17 +502,12 @@ function loadAndApplyAppSettings() {
     setActiveSettingsTab(appSettings.tutorAiActiveSettingsTab || 'basic');
 }
 
-function setDarkModeUI(enabled) {
-    if (enabled) {
-        body.classList.add('dark-mode');
-    } else {
-        body.classList.remove('dark-mode');
-    }
-}
-if (darkModeToggle) {
-    darkModeToggle.addEventListener('change', async function() {
-        appSettings.tutorAiChatDarkModeEnabled = this.checked;
-        setDarkModeUI(this.checked);
+// Theme selector event listener
+if (themeSelector) {
+    themeSelector.addEventListener('change', async function() {
+        const newTheme = this.value;
+        appSettings.currentTheme = newTheme;
+        applyTheme(newTheme);
         await saveAllAppSettings();
     });
 }
@@ -1734,12 +1756,27 @@ async function initializeApp() {
     const translationsLoadedSuccessfully = await fetchTranslations();
 
     const loadedSettings = await loadDataFromFile(SETTINGS_FILE, {});
-    appSettings = { ...appSettings, ...loadedSettings };
+    appSettings = { ...appSettings, ...loadedSettings }; // Merge loaded settings, potentially overwriting defaults
+
+    // Migration from tutorAiChatDarkModeEnabled to currentTheme
+    if (appSettings.hasOwnProperty('tutorAiChatDarkModeEnabled')) {
+        if (!appSettings.hasOwnProperty('currentTheme')) { // Only migrate if currentTheme isn't already set
+            appSettings.currentTheme = appSettings.tutorAiChatDarkModeEnabled ? 'dark' : 'light';
+        }
+        delete appSettings.tutorAiChatDarkModeEnabled; // Clean up old key
+        console.log("Migrated old dark mode setting. New theme:", appSettings.currentTheme);
+    }
+    // Ensure currentTheme has a default if it's still missing after potential load/migration
+    if (!appSettings.currentTheme) {
+        appSettings.currentTheme = DEFAULT_THEME;
+    }
+
     if (typeof appSettings.ollamaTemperatureSetting === 'string') {
         appSettings.ollamaTemperatureSetting = parseFloat(appSettings.ollamaTemperatureSetting).toFixed(1);
     } else if (typeof appSettings.ollamaTemperatureSetting !== 'number') {
         appSettings.ollamaTemperatureSetting = DEFAULT_OLLAMA_TEMPERATURE.toFixed(1);
     }
+
 
     // Load student progression (tutoring state)
     await loadUserStateFromFile(); // This handles defaults and version checks
@@ -1747,7 +1784,7 @@ async function initializeApp() {
     const loadedChatHistory = await loadDataFromFile(CHAT_HISTORY_FILE, []);
     chatHistory = Array.isArray(loadedChatHistory) ? loadedChatHistory : [];
 
-    loadAndApplyAppSettings();
+    loadAndApplyAppSettings(); // This will now also apply the theme
     applyTranslations(); // Apply after all data that might affect UI text is loaded
     await loadChatHistoryFromFile();
 
@@ -1767,7 +1804,7 @@ async function initializeApp() {
             markdownToggle.checked = false;
             markdownToggle.disabled = true;
             appSettings.tutorAiChatMarkdownEnabled = false;
-            await saveAllAppSettings();
+            // No need to save here, will be saved if user changes other settings or on next successful save.
         }
     } else {
         marked.setOptions({ breaks: true, gfm: true, pedantic: false, smartLists: true, smartypants: false });

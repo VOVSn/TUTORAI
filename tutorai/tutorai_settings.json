@@ -3,7 +3,7 @@
     "ollamaUserModel": "gemma3:12b",
     "ollamaTemperatureSetting": "0.3",
     "tutorAiChatMarkdownEnabled": true,
-    "tutorAiChatDarkModeEnabled": true,
+    "currentTheme": "memphis",
     "tutorAiActiveSettingsTab": "basic",
     "tutorAiStreamResponsesEnabled": true
 }

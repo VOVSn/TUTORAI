@@ -432,5 +432,397 @@
         "timestamp": 1747872683623,
         "hasImage": false,
         "imageBase64": null
+    },
+    {
+        "text": "Welcome back! Last time you were practicing french by translating sentences from french to english. How would you like to proceed today? (e.g., 'continue', 'learn Spanish', 'translate English to French')",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873538119
+    },
+    {
+        "text": "continue",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873544597
+    },
+    {
+        "text": "Great! Let's start your french lesson, translating from french to english. I'll give you up to 5 sentences. Please provide your translations one by one.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873550345
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Le chat est sur la table.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873552165
+    },
+    {
+        "text": "the cat is on the table",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873585646
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe translation is perfectly correct! 'The cat is on the table' is a natural and accurate translation of 'Le chat est sur la table.'",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873605514
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're demonstrating a good understanding of basic French sentence structure and vocabulary. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873605521
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"J'aime manger des pommes.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873605532
+    },
+    {
+        "text": "I like to eat apples.",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873658853
+    },
+    {
+        "text": "**Corrections/Feedback:**\nYour translation is perfectly correct! 'I like to eat apples' is a natural and accurate translation of 'J'aime manger des pommes'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873681132
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're demonstrating a good understanding of basic French sentence structure and vocabulary. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873681136
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Il fait beau aujourd'hui.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873681149
+    },
+    {
+        "text": "The day is beautiful today",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873703801
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe most natural translation is 'The weather is beautiful today.' While 'The day is beautiful today' isn't incorrect, it's less idiomatic in English. 'Il fait beau' literally translates to 'It is beautiful weather.'",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873734484
+    },
+    {
+        "text": "**Advice:**\nGreat effort! You're getting the gist of things. Pay attention to how weather expressions are typically phrased in English. Keep practicing, and you'll get a better feel for the nuances of translation.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873734489
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Nous allons au parc.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873734497
+    },
+    {
+        "text": "we are going to the park",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873755806
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe most natural translation is 'We are going to the park.' While your translation is understandable, it's a bit wordy. The structure 'Nous allons au parc' directly translates to 'We are going to the park'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873791499
+    },
+    {
+        "text": "**Advice:**\nExcellent work on tackling this sentence! You'll find that French often uses more direct phrasing. Pay attention to how sentence structure translates directly, and don't feel the need to add extra words. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873791504
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Elle a un nouveau livre.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873791515
+    },
+    {
+        "text": "she has a new book",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873840727
+    },
+    {
+        "text": "**Corrections/Feedback:**\nYour translation 'she has a new book' is perfectly correct! It's a natural and accurate translation of 'Elle a un nouveau livre.'",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873880833
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're demonstrating a good grasp of French sentence structure and vocabulary. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873880838
+    },
+    {
+        "text": "Concluding lesson and generating summary...",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873880847
+    },
+    {
+        "text": "**Lesson Summary**\nYou're demonstrating a solid grasp of French vocabulary and sentence structure! Your translations were often perfect, showing a good understanding of the material. You occasionally stumbled on idiomatic expressions and direct translations, but your efforts to understand the nuances are commendable. You consistently translated sentences accurately, showcasing a good foundation in French.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873884977
+    },
+    {
+        "text": "**Keep it Up!**\nFantastic work completing this lesson! Your dedication to improving your French is truly impressive. Keep up the great effort, and you're sure to see continued progress!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873884982
+    },
+    {
+        "text": "**Next Focus for french** idiomatic expressions related to weather",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873884991
+    },
+    {
+        "text": "Lesson complete! Well done.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873885005
+    },
+    {
+        "text": "Welcome back! Last time you were practicing french by translating sentences from french to english. How would you like to proceed today? (e.g., 'continue', 'learn Spanish', 'translate English to French')",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873940538
+    },
+    {
+        "text": "continut",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873945434
+    },
+    {
+        "text": "Great! Let's start your french lesson, translating from french to english. I'll give you up to 5 sentences. Please provide your translations one by one.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873946924
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Le soleil brille aujourd'hui.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873948729
+    },
+    {
+        "text": "the sun shines today",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873957089
+    },
+    {
+        "text": "**Corrections/Feedback:**\nYour translation is very good! A more natural English phrasing would be 'The sun is shining today.'",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873990539
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're doing a fantastic job with French vocabulary. Remember that when describing weather, 'shine' is often translated as 'is shining' or 'is sunny'. Keep practicing with idiomatic expressions related to weather to improve your fluency.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873990543
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"J'aime beaucoup les chats.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747873990554
+    },
+    {
+        "text": "I love cats very much",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874006499
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct phrasing is 'I love cats very much'. While your translation is understandable, it's a bit less natural. The word order in French often translates directly to English, but sometimes a slight adjustment makes it sound more idiomatic.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874043479
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're demonstrating a good grasp of French vocabulary and sentence structure. Remember to pay attention to how word order can slightly change the natural flow of a sentence when translating. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874043483
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Elle est tr\u00e8s contente de son livre.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874043495
+    },
+    {
+        "text": "She is fine with her book",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874134096
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'She is happy with her book.' The word 'contente' means 'happy' or 'pleased', not 'fine'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874176850
+    },
+    {
+        "text": "**Advice:**\nYou're doing a great job with vocabulary! Remember to pay close attention to the nuances of word meanings, as 'contente' has a more specific meaning than 'fine'. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874176855
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Il fait froid en hiver.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874176868
+    },
+    {
+        "text": "I snows in winter",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874202789
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'It snows in winter.' or 'It is snowing in winter.' The verb 'to snow' is impersonal in French, meaning it doesn't have a subject. Therefore, you don't use 'snows'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874241801
+    },
+    {
+        "text": "**Advice:**\nYou're doing well with basic sentence structure! Remember that French uses impersonal verbs in certain situations where English uses a conjugated verb. Pay close attention to these constructions as you continue learning.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874241806
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Nous allons au parc demain.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874241818
+    },
+    {
+        "text": "we are going to the park tomorron",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874296005
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'We are going to the park tomorrow.' You misspelled 'tomorrow'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874339512
+    },
+    {
+        "text": "**Advice:**\nYou're doing a great job with the core meaning! Pay close attention to spelling, especially when dealing with words borrowed from other languages. A little extra care with spelling will make your translations even more polished.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874339515
+    },
+    {
+        "text": "Concluding lesson and generating summary...",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874339525
+    },
+    {
+        "text": "**Lesson Summary**\nYou demonstrated a good grasp of French vocabulary and sentence structure throughout this lesson, consistently translating sentences accurately. However, there were some areas where corrections were needed, particularly regarding idiomatic expressions, verb conjugations, and spelling. Your translations were often perfect, showcasing a good understanding of the core concepts, but attention to detail will elevate your fluency.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874344164
+    },
+    {
+        "text": "**Keep it Up!**\nKeep up the fantastic work! Your progress in French is evident, and with continued practice, you're sure to achieve your language goals. Don't be discouraged by the corrections \u2013 they are opportunities to learn and grow!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874344168
+    },
+    {
+        "text": "**Next Focus for french** idiomatic expressions related to weather",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874344178
+    },
+    {
+        "text": "Lesson complete! Well done.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747874344187
     }
 ]
