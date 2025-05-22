@@ -1,0 +1,436 @@
+[
+    {
+        "text": "hello",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872049828
+    },
+    {
+        "text": "Hello! How can I help you today?",
+        "type": "ai",
+        "timestamp": 1747872054606,
+        "hasImage": false,
+        "imageBase64": null
+    },
+    {
+        "text": "what is fsmo",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872057837
+    },
+    {
+        "text": "FSMO stands for File Server Mobility (FSMO) roles. They are a set of roles in Windows Active Directory that handle specific administrative tasks related to directory services. Think of them as critical functions distributed across domain controllers for redundancy and reliability.",
+        "type": "ai",
+        "timestamp": 1747872058967,
+        "hasImage": false,
+        "imageBase64": null
+    },
+    {
+        "text": "Okay! What language would you like to learn or practice today, and how would you like to translate? (e.g., 'I want to learn Spanish by translating from English to Spanish' or 'Practice my French understanding')",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872063532
+    },
+    {
+        "text": "from spanish to engl",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872071135
+    },
+    {
+        "text": "Great! Let's start your spanish lesson, translating from spanish to english. I'll give you 5 sentences. Please provide your translations one by one.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872072041
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"El gato es peque\u00f1o.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872073318
+    },
+    {
+        "text": "the cat is small",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872079857
+    },
+    {
+        "text": "**Corrections/Feedback:**\nYour translation is perfect! 'El gato es peque\u00f1o' translates directly to 'the cat is small'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872088911
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're understanding the basics of Spanish sentence structure very well. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872088914
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Me gusta el sol.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872088919
+    },
+    {
+        "text": "I like the sun",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872123440
+    },
+    {
+        "text": "**Corrections/Feedback:**\nYour translation is perfect! 'Me gusta el sol' directly translates to 'I like the sun'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872136211
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're demonstrating a good grasp of basic Spanish sentence structure and vocabulary. Keep up the great work!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872136214
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Yo como una manzana.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872136219
+    },
+    {
+        "text": "I eat an apple",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872166444
+    },
+    {
+        "text": "**Corrections/Feedback:**\nYour translation is perfect! 'Yo como una manzana' directly translates to 'I eat an apple'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872183559
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're demonstrating a good grasp of basic Spanish sentence structure and vocabulary. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872183564
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Ella tiene un perro.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872183574
+    },
+    {
+        "text": "She has a dog",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872195306
+    },
+    {
+        "text": "**Corrections/Feedback:**\nYour translation is perfect! 'Ella tiene un perro' directly translates to 'She has a dog'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872216094
+    },
+    {
+        "text": "**Advice:**\nExcellent work! You're demonstrating a good grasp of basic Spanish sentence structure and vocabulary. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872216098
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Nosotros vamos a la escuela.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872216106
+    },
+    {
+        "text": "we are going to the school",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872259619
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'we are going to the school'. While understandable, 'we are going to the school' is more natural than 'we are going to the school'. The article 'la' is required before 'escuela' because it's a specific, known school.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872287130
+    },
+    {
+        "text": "**Advice:**\nGreat effort! You're grasping the basics of sentence structure. Remember that Spanish often uses the definite article 'la' before nouns, especially when referring to specific places. Keep practicing with articles and common phrases!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872287134
+    },
+    {
+        "text": "tutorConcludingMessageDisplay",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872287144
+    },
+    {
+        "text": "**tutorLessonSummaryTitle**\nYou're doing a fantastic job with basic Spanish sentence structure and vocabulary! You consistently translated sentences accurately, demonstrating a good understanding of the fundamentals. The only area where a little more attention is needed is the use of definite articles, specifically when referring to specific places like 'escuela'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872290547
+    },
+    {
+        "text": "**tutorMotivationalMessageTitle**\nKeep up the excellent work! Your dedication is paying off, and you're making great progress in your Spanish journey. Every sentence you translate brings you closer to fluency!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872290552
+    },
+    {
+        "text": "**tutorNextFocusSuggestionTitle** use of definite articles",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872290560
+    },
+    {
+        "text": "Lesson complete! Well done.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872290570
+    },
+    {
+        "text": "Welcome back! Last time you were practicing spanish by translating sentences from spanish to english. How would you like to proceed today? (e.g., 'continue', 'learn Spanish', 'translate English to French')",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872393849
+    },
+    {
+        "text": "from french to english",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872404194
+    },
+    {
+        "text": "Great! Let's start your french lesson, translating from french to english. I'll give you up to 5 sentences. Please provide your translations one by one.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872405460
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Bonjour, comment allez-vous ?\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872406866
+    },
+    {
+        "text": "Hello, how are you",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872414357
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'Hello, how are you?'. You're very close! The capitalization of the first word is important.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872428679
+    },
+    {
+        "text": "**Advice:**\nExcellent start! You're grasping the basic vocabulary. Pay close attention to capitalization and punctuation in English translations. Keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872428684
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"J'aime le chocolat.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872428692
+    },
+    {
+        "text": "I love choclate",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872469317
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'I love chocolate.' You misspelled 'chocolate'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872482710
+    },
+    {
+        "text": "**Advice:**\nYou're doing great with the core meaning! Just be sure to double-check your spelling. It's a common mistake, and everyone makes them. Keep up the good work!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872482714
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Le chat est sur la table.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872482722
+    },
+    {
+        "text": "the cat is on the table",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872505391
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'the cat is on the table'. You're spot on! No corrections needed.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872521748
+    },
+    {
+        "text": "**Advice:**\nFantastic! You translated the sentence perfectly. Your vocabulary and understanding of sentence structure are excellent. Keep up the great work!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872521752
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Il fait beau aujourd'hui.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872521761
+    },
+    {
+        "text": "I is good day today",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872556106
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'It is beautiful today.' Your sentence uses incorrect verb conjugations. 'Il fait' means 'it makes' or 'it is' in this context, and 'beau' means 'beautiful'.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872582932
+    },
+    {
+        "text": "**Advice:**\nYou're doing well with vocabulary! Remember to pay close attention to verb conjugations and sentence structure. It's a common area where learners make mistakes. Don't be discouraged; keep practicing!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872582935
+    },
+    {
+        "text": "Please translate this sentence to english:\n\n\"Je suis \u00e9tudiant.\"",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872582949
+    },
+    {
+        "text": "I am a student",
+        "type": "user",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872611546
+    },
+    {
+        "text": "**Corrections/Feedback:**\nThe correct translation is 'I am a student.' Your translation is accurate and well done!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872641752
+    },
+    {
+        "text": "**Advice:**\nExcellent! You're doing a great job translating simple sentences. Keep practicing and focusing on verb conjugations and sentence structure.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872641757
+    },
+    {
+        "text": "Concluding lesson and generating summary...",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872641766
+    },
+    {
+        "text": "**Lesson Summary**\nYou demonstrated a good grasp of French vocabulary and sentence structure throughout the lesson. You accurately translated several sentences, showcasing a solid understanding of the basics. However, verb conjugations and occasional spelling errors (like 'choclate') were areas where you could improve. Don't worry, these are common challenges for learners!",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872645585
+    },
+    {
+        "text": "**Keep it Up!**\nKeep up the fantastic effort! You're making great strides in your French journey. Each sentence you translate brings you closer to fluency. Celebrate your successes and learn from any corrections.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872645590
+    },
+    {
+        "text": "**Next Focus for french** verb conjugation",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872645595
+    },
+    {
+        "text": "Lesson complete! Well done.",
+        "type": "tutor",
+        "hasImage": false,
+        "imageBase64": null,
+        "timestamp": 1747872645605
+    },
+    {
+        "text": "what is this",
+        "type": "user",
+        "hasImage": true,
+        "imageBase64": "data:image/jpeg;base64,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",
+        "timestamp": 1747872682061
+    },
+    {
+        "text": "That appears to be a piece of chocolate, likely a dark chocolate square. It seems to be part of the previous lesson summary and encouragement.",
+        "type": "ai",
+        "timestamp": 1747872683623,
+        "hasImage": false,
+        "imageBase64": null
+    }
+]

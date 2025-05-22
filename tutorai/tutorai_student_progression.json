@@ -1,0 +1,68 @@
+{
+    "version": "1.1",
+    "user_preferences": {
+        "default_input_lang": null,
+        "default_output_lang": "english",
+        "last_learn_lang": "french",
+        "last_input_lang": "french",
+        "last_output_lang": "english"
+    },
+    "language_proficiency": {
+        "spanish": {
+            "level": 0.18,
+            "last_practiced_utc": "2025-05-22T00:02:19.860Z",
+            "strengths": [
+                "basic sentence structure",
+                "vocabulary"
+            ],
+            "weaknesses": [
+                "use of definite articles"
+            ],
+            "correct_streak_session": 4,
+            "overall_accuracy_estimate": 0.88
+        },
+        "french": {
+            "level": 0.11,
+            "last_practiced_utc": "2025-05-22T00:06:54.360Z",
+            "strengths": [
+                "vocabulary"
+            ],
+            "weaknesses": [
+                "punctuation",
+                "capitalization",
+                "verb conjugation"
+            ],
+            "correct_streak_session": 2,
+            "overall_accuracy_estimate": 0.77
+        }
+    },
+    "learning_focus": {
+        "french": [
+            "punctuation",
+            "capitalization",
+            "verb conjugation"
+        ]
+    },
+    "lesson_history_summary": [
+        {
+            "date_utc": "2025-05-22T00:04:50.565Z",
+            "lang_pair": "spanish-english",
+            "learn_lang": "spanish",
+            "key_takeaway": "You're doing a fantastic job with basic Spanish sentence structure and vocabulary! You consistently translated sentences accurately, demonstrating a g...",
+            "num_exercises": 5
+        },
+        {
+            "date_utc": "2025-05-22T00:10:45.600Z",
+            "lang_pair": "french-english",
+            "learn_lang": "french",
+            "key_takeaway": "You demonstrated a good grasp of French vocabulary and sentence structure throughout the lesson. You accurately translated several sentences, showcasi...",
+            "num_exercises": 5
+        }
+    ],
+    "current_lesson_data": {
+        "learn_lang": null,
+        "input_lang": null,
+        "output_lang": null,
+        "interactions": []
+    }
+}
