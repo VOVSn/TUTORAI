@@ -1,9 +1,9 @@
 {
     "ollamaUserEndpoint": "http://localhost:11434/api/generate",
     "ollamaUserModel": "gemma3:12b",
-    "ollamaTemperatureSetting": "0.3",
+    "ollamaTemperatureSetting": "1.0",
     "tutorAiChatMarkdownEnabled": true,
     "currentTheme": "memphis",
-    "tutorAiActiveSettingsTab": "basic",
+    "tutorAiActiveSettingsTab": "advanced",
     "tutorAiStreamResponsesEnabled": true
 }
