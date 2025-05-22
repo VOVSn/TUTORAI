@@ -35,11 +35,12 @@
 
                 <div class="settings-tab-content active" id="settings-tab-basic">
                     <div class="settings-row">
-                        <div class="settings-label" data-translate-key="darkModeLabel">Dark Mode</div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="darkModeToggle">
-                            <span class="toggle-slider"></span>
-                        </label>
+                        <div class="settings-label" data-translate-key="themeLabel">Theme</div>
+                        <select id="themeSelector" class="settings-input">
+                            <option value="light" data-translate-key="themeLight">Light</option>
+                            <option value="dark" data-translate-key="themeDark">Dark</option>
+                            <option value="memphis" data-translate-key="themeMemphis">Memphis</option>
+                        </select>
                     </div>
                     <div class="settings-row">
                         <div class="settings-label" data-translate-key="streamResponsesLabel">Stream Responses</div>
