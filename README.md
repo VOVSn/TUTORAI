@@ -76,9 +76,6 @@ TUTORAI is a desktop application that allows you to chat with local AI models (l
     *   `tutorai_chat_history.json`: Stores your chat messages locally.
     *   `tutorai_settings.json`: Saves your application preferences like theme, Ollama configuration, etc.
     *   `tutorai_student_progression.json`: Keeps track of your progress within the language tutoring module.
-*   `lite/`: Contains a simplified, single-file HTML version of the chat application (TUTORAI Lite) and its related assets.
-    *   `tutorai_lite.html`: A standalone HTML file demonstrating a basic version of the chat UI.
-    *   `README.md`, `screenshot1.png`, `screenshot2.png`: Assets specifically for the "lite" version.
 
 ## How to Use
 
